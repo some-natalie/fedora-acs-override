@@ -1,13 +1,11 @@
 # Fedora 28 + PCI passthrough
 
-I put this together based on my own machine at home because I knew I'd forget this process if I ever had to do it again.  There was a lot of reading of Bugzilla, StackOverflow, and a bunch of blogs/forums/mailing lists all over the internet.  Thanks to everyone who did something similar so I could cobble together something from all of them that Works On My Machine.  This is by no means the only way to solve the problem.  :)
-
 
 ### Prerequisites
 - Fedora 28 (fresh install off the live USB image)
 - Computer with
   - Two graphics cards
-  - Motherboard with the Intel 200 series chipset (Union Point)
+  - Motherboard with the Intel 200 series chipset (Union Point) or newer
 - A fresh backup of anything you don't care to lose
 
 :information_source:  The two graphics cards can be different models.  If your cards are identical, you'll need to do some extra steps that are prefaced with (ACS only).  These steps include compiling your own kernel to include Alex Williamson's patch to allow any PCIe device to use Access Control Services.  More information on this patch, why it's necessary, and what it does available [here](https://lkml.org/lkml/2013/5/30/513).  If your cards aren't identical, skip these steps.
@@ -177,3 +175,7 @@ I put this together based on my own machine at home because I knew I'd forget th
 ### Resources
 - Alex Williamson's blog on the VFIO tips and tricks - [link](https://vfio.blogspot.com/)
 - Arch Linux wiki post on PCI passthrough -  [link](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF)
+
+
+### Disclaimer
+I put this together based on my own machine at home because I knew I'd forget this process if I ever had to do it again.  There was a lot of reading of Bugzilla, StackOverflow, and a bunch of blogs/forums/mailing lists all over the internet.  Thanks to everyone who did something similar so I could cobble together something from all of them that Works On My Machine.  This is by no means the only way to solve the problem.  :)
