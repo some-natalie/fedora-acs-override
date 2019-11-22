@@ -1,8 +1,8 @@
-# Fedora 28 + PCI passthrough
+# Fedora 31 + PCI passthrough
 
 
 ### Prerequisites
-- Fedora 28 (fresh install off the live USB image)
+- Fedora 31 (fresh install off the live USB image)
 - Computer with
   - Two graphics cards
   - Motherboard with the Intel 200 series chipset (Union Point) or newer

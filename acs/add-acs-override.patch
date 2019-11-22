@@ -1,86 +1,22 @@
-From 34bc05224cb8eb303fb2745da2136f91a9f9da6a Mon Sep 17 00:00:00 2001
-From: Natalie Somersall <natalie.somersall@gmail.com>
-Date: Fri, 14 Sep 2018 12:36:45 -0400
-Subject: [PATCH] [PATCH] pci: Enable overrides for missing ACS capabilities
- (4.18)
+From 5fe4a38b2c7868461c22c3d6ce2a6f368aba9e3f Mon Sep 17 00:00:00 2001
+From: Fedora Kernel Team <kernel-team@fedoraproject.org>
+Date: Thu, 29 Nov 2018 09:10:12 -0500
+Subject: [PATCH] add acs override
 
-This an updated version of Alex Williamson's patch from the link below,
-modified to compile for Fedora 28 using kernel 4.18.x
-
-https://lkml.org/lkml/2013/5/30/513
-
-Original commit message follows:
+Signed-off-by: Fedora Kernel Team <kernel-team@fedoraproject.org>
 ---
-PCIe ACS (Access Control Services) is the PCIe 2.0+ feature that
-allows us to control whether transactions are allowed to be redirected
-in various subnodes of a PCIe topology.  For instance, if two
-endpoints are below a root port or downsteam switch port, the
-downstream port may optionally redirect transactions between the
-devices, bypassing upstream devices.  The same can happen internally
-on multifunction devices.  The transaction may never be visible to the
-upstream devices.
+ drivers/pci/quirks.c | 101 +++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 101 insertions(+)
 
-One upstream device that we particularly care about is the IOMMU.  If
-a redirection occurs in the topology below the IOMMU, then the IOMMU
-cannot provide isolation between devices.  This is why the PCIe spec
-encourages topologies to include ACS support.  Without it, we have to
-assume peer-to-peer DMA within a hierarchy can bypass IOMMU isolation.
-
-Unfortunately, far too many topologies do not support ACS to make this
-a steadfast requirement.  Even the latest chipsets from Intel are only
-sporadically supporting ACS.  We have trouble getting interconnect
-vendors to include the PCIe spec required PCIe capability, let alone
-suggested features.
-
-Therefore, we need to add some flexibility.  The pcie_acs_override=
-boot option lets users opt-in specific devices or sets of devices to
-assume ACS support.  The "downstream" option assumes full ACS support
-on root ports and downstream switch ports.  The "multifunction"
-option assumes the subset of ACS features available on multifunction
-endpoints and upstream switch ports are supported.  The "id:nnnn:nnnn"
-option enables ACS support on devices matching the provided vendor
-and device IDs, allowing more strategic ACS overrides.  These options
-may be combined in any order.  A maximum of 16 id specific overrides
-are available.  It's suggested to use the most limited set of options
-necessary to avoid completely disabling ACS across the topology.
-Note to hardware vendors, we have facilities to permanently quirk
-specific devices which enforce isolation but not provide an ACS
-capability.  Please contact me to have your devices added and save
-your customers the hassle of this boot option.
-
-Signed-off-by: Natalie Somersall <natalie.somersall@gmail.com>
----
- .../admin-guide/kernel-parameters.txt         |   8 ++
- drivers/pci/quirks.c                          | 102 ++++++++++++++++++
- 2 files changed, 110 insertions(+)
-
-diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
-index 1370b42..25c2047 100644
---- a/Documentation/admin-guide/kernel-parameters.txt
-+++ b/Documentation/admin-guide/kernel-parameters.txt
-@@ -3106,6 +3106,14 @@
- 		nomsi		[MSI] If the PCI_MSI kernel config parameter is
- 				enabled, this kernel boot option can be used to
- 				disable the use of MSI interrupts system-wide.
-+		pci_acs_override	[PCIE] Override missing PCIe ACS support for:
-+				downstream
-+					All downstream ports - full ACS capabilities
-+				multifunction
-+					Add multifunction devices - multifunction ACS subset
-+				id:nnnn:nnnn
-+					Specific device - full ACS capabilities
-+					Specified as vid:did (vendor/device ID) in hex
- 		noioapicquirk	[APIC] Disable all boot interrupt quirks.
- 				Safety option to keep boot IRQs enabled. This
- 				should never be necessary.
 diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
-index f439de8..5c3ec5e 100644
+index 695d99b..8e4f25a 100644
 --- a/drivers/pci/quirks.c
 +++ b/drivers/pci/quirks.c
-@@ -186,6 +186,106 @@ static int __init pci_apply_final_quirks(void)
+@@ -194,6 +194,107 @@ static int __init pci_apply_final_quirks(void)
  }
  fs_initcall_sync(pci_apply_final_quirks);
  
++
 +static bool acs_on_downstream;
 +static bool acs_on_multifunction;
 +
@@ -181,17 +117,9 @@ index f439de8..5c3ec5e 100644
 +	return -ENOTTY;
 +}
 +
- /*
-  * Decoding should be disabled for a PCI device during BAR sizing to avoid
-  * conflict. But doing so may cause problems on host bridge and perhaps other
-@@ -4395,6 +4495,8 @@ static const struct pci_dev_acs_enabled {
- 	{ PCI_VENDOR_ID_AMPERE, 0xE00A, pci_quirk_xgene_acs },
- 	{ PCI_VENDOR_ID_AMPERE, 0xE00B, pci_quirk_xgene_acs },
- 	{ PCI_VENDOR_ID_AMPERE, 0xE00C, pci_quirk_xgene_acs },
-+	/* allow acs for any */
-+	{ PCI_ANY_ID, PCI_ANY_ID, pcie_acs_overrides },
- 	{ 0 }
- };
+ static bool acs_on_downstream;
+ static bool acs_on_multifunction;
  
 -- 
-2.17.1
+2.19.1
+
