@@ -37,7 +37,7 @@
 
 1. (ACS only) - Add the ACS patch ([link](acs/add-acs-override.patch)) as `~/rpmbuild/SOURCES/add-acs-override.patch`.
     ```shell
-    curl
+    curl -o ~/rpmbuild/SOURCES/add-acs-override.patch https://raw.githubusercontent.com/Somersall-Natalie/fedora-acs-override/master/acs/add-acs-override.patch    
     ```
 
 1. (ACS only) - Edit `~/rpmbuild/SPECS/kernel.spec` to set the build ID and add the patch.  Since each release of the spec file could change, it's not much help giving line numbers, but both of these should be near the top of the file.  To set the build id, add the two lines near the top of the spec file with the other release information.
