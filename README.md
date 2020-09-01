@@ -49,7 +49,7 @@
     To add the patch, add the two lines below to the spec file in the section for patches.
     ```
     # ACS override patch
-    Patch1000: add-acs-overrides.patch
+    Patch1000: add-acs-override.patch
     ```
 
 1. (ACS only) - Compile!  This takes a [long time](https://xkcd.com/303/).
