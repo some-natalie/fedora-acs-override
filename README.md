@@ -46,10 +46,15 @@
     %define buildid .acs
     ```
 
-    To add the patch, add the two lines below to the spec file in the section for patches.
+    To add the patch, add the two lines below to the spec file in the section for patches (usually right below the sources).
     ```
     # ACS override patch
     Patch1000: add-acs-override.patch
+    ```
+
+    Then tell it to apply the patch in the `prep` section.
+    ```
+    ApplyOptionalPatch add-acs-overrides.patch
     ```
 
 1. (ACS only) - Compile!  This takes a [long time](https://xkcd.com/303/).
