@@ -128,8 +128,8 @@
 
 1. Create or edit `/etc/dracut.conf.d/local.conf`, adding the line below:
     ```
-    add_drivers+="vfio vfio_iommu_type1 vfio_pci vfio_virqfd"
-    install_items+="/sbin/vfio-pci-override.sh /usr/bin/find /usr/bin/dirname"
+    add_drivers+= " vfio vfio_iommu_type1 vfio_pci vfio_virqfd "
+    install_items+=" /sbin/vfio-pci-override.sh /usr/bin/find /usr/bin/dirname "
     ```
 
 1. Create a file `/sbin/vfio-pci-override.sh` with permissions `755` (file in this directory of the repo).
