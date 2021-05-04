@@ -1,8 +1,8 @@
-# Fedora 33 + PCI passthrough
+# Fedora 34 + PCI passthrough
 
 
 ### Prerequisites
-- Fedora 33 (fresh install off the live USB image)
+- Fedora 34 (fresh install off the live USB image)
 - Computer with
   - Two graphics cards
   - Motherboard with the Intel 200 series chipset (Union Point) or newer
