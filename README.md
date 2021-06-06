@@ -52,7 +52,7 @@
     Patch1000: add-acs-override.patch
     ```
 
-    Then tell it to apply the patch in the `prep` section. It will be bwlow the `ApplyOptionalPatch()` section, normally right above the `# END OF PATCH APPLICATIONS` note.
+    Then tell it to apply the patch in the `prep` section. It will be below the `ApplyOptionalPatch()` variable, normally right above the `# END OF PATCH APPLICATIONS` note.
     ```
     ApplyOptionalPatch add-acs-override.patch
     ```
