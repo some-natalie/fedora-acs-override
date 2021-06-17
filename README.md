@@ -19,7 +19,7 @@
 
 1. (ACS only) - Install the dependencies to start building your own kernel.
     ```shell
-    sudo dnf install fedpkg fedora-packager rpmdevtools ncurses-devel pesign rpmtools
+    sudo dnf install fedpkg fedora-packager rpmdevtools ncurses-devel pesign
     ```
 
 1. (ACS only) - Set up your home build directory (if you haven't ever built any RPMs before)
@@ -49,12 +49,12 @@
     To add the patch, add the two lines below to the spec file in the section for patches (usually right below the sources).
     ```
     # ACS override patch
-    Patch1000: add-acs-overrides.patch
+    Patch1000: add-acs-override.patch
     ```
 
-    Then tell it to apply the patch in the `prep` section.
+    Then tell it to apply the patch in the `prep` section. It will be below the `ApplyOptionalPatch()` function definition, normally right above the `# END OF PATCH APPLICATIONS` comment.
     ```
-    ApplyOptionalPatch add-acs-overrides.patch
+    ApplyOptionalPatch add-acs-override.patch
     ```
 
 1. (ACS only) - Compile!  This takes a [long time](https://xkcd.com/303/).
