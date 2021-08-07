@@ -21,7 +21,7 @@
 1. (ACS only) - Install the dependencies to start building your own kernel.
 
     ```shell
-    sudo dnf install fedpkg fedora-packager rpmdevtools ncurses-devel pesign
+    sudo dnf install fedpkg fedora-packager rpmdevtools ncurses-devel pesign bpftool
     ```
 
 1. (ACS only) - Set up your home build directory (if you haven't ever built any RPMs before)
