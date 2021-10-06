@@ -15,7 +15,7 @@ $ lscpu | grep Tsx
 Vulnerability Tsx async abort:   Mitigation; TSX disabled
 ```
 
-To mitigate it, I disabled these features in the VM to match the host.  Add the following to the XML file defining your virtual machine for libvirt in the CPU section:
+To mitigate it, I disabled these features in the VM to match the host.  Add the two `feature policy` lines, as shown below, to the XML file defining your virtual machine for libvirt in the CPU section:
 
 ```xml
 <cpu mode="custom" match="exact" check="partial">
