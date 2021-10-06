@@ -10,6 +10,8 @@
 
 :information_source:  The two graphics cards can be different models.  If your cards are identical, you'll need to do some extra steps that are prefaced with (ACS only).  These steps include compiling your own kernel to include Alex Williamson's patch to allow any PCIe device to use Access Control Services.  More information on this patch, why it's necessary, and what it does available [here](https://lkml.org/lkml/2013/5/30/513).  If your cards aren't identical, skip these steps.
 
+:warning:  Having problems since kernel 5.14.x?  Check out the [notes](NOTES.md)!
+
 ## Setup and configuration of the host machine
 
 1. Add RPM Fusion
@@ -33,8 +35,8 @@
 1. (ACS only) - Install the kernel source and finish installing dependencies.
 
     ```shell
-    koji download-build --arch=src kernel-4.18.5-200.fc28
-    rpm -Uvh kernel-4.18.5-200.fc28.src.rpm
+    koji download-build --arch=src kernel-5.14.9-200.fc34.src.rpm
+    rpm -Uvh kernel-5.14.9-200.fc34.src.rpm
     cd rpmbuild/SPECS/
     sudo dnf builddep kernel.spec
     ```
@@ -42,7 +44,7 @@
 1. (ACS only) - Add the ACS patch ([link](acs/add-acs-override.patch)) as `~/rpmbuild/SOURCES/add-acs-override.patch`.
 
     ```shell
-    curl -o ~/rpmbuild/SOURCES/add-acs-override.patch https://raw.githubusercontent.com/Somersall-Natalie/fedora-acs-override/master/acs/add-acs-override.patch    
+    curl -o ~/rpmbuild/SOURCES/add-acs-override.patch https://raw.githubusercontent.com/some-natalie/fedora-acs-override/main/acs/add-acs-override.patch    
     ```
 
 1. (ACS only) - Edit `~/rpmbuild/SPECS/kernel.spec` to set the build ID and add the patch.  Since each release of the spec file could change, it's not much help giving line numbers, but both of these should be near the top of the file.  To set the build id, add the two lines near the top of the spec file with the other release information.
