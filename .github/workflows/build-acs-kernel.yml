@@ -1,0 +1,18 @@
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build the Fedora kernel with the ACS override patch in this repo
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v2
+
+      - name: Build the RPMs
+        uses: ./
+
+      - name: Upload the RPMs as artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: acs-override-rpms
+          path: ~/rpmbuild/RPMS/x86_64/

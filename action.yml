@@ -1,0 +1,7 @@
+name: 'Build ACS kernel'
+
+description: 'Build and upload the latest Fedora kernel RPMs with the ACS override patch'
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
