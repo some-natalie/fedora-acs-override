@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Set environment variable
+echo "::set-output kernel-version::$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+')"
+
 # Download the latest kernel source RPM
 koji download-build --arch=src kernel-"$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+')".fc34.src.rpm
 
