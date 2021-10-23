@@ -12,7 +12,9 @@
 
 :warning:  Having problems since kernel 5.14.x?  Check out the [notes](NOTES.md)!
 
-:new:  Just want the RPMs?  Go to the latest Actions workflow run and download the RPMs as a build artifact. :)
+:new:  Just want the RPMs?  Go to the [latest workflow run](https://github.com/some-natalie/fedora-acs-override/actions/workflows/build-acs-kernel.yml) and download the RPMs as a build artifact, as shown below:
+
+![download-rpms](pics/download-rpms.jpg | width=100%)
 
 ## Setup and configuration of the host machine
 
