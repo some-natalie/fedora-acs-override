@@ -18,4 +18,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: acs-override-rpms
-          path: /github/home/rpmbuild/RPMS/x86_64/
+          path: /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
