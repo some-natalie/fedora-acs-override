@@ -12,6 +12,8 @@
 
 :warning:  Having problems since kernel 5.14.x?  Check out the [notes](NOTES.md)!
 
+:new:  Just want the RPMs?  Go to the latest Actions workflow run and download the RPMs as a build artifact. :)
+
 ## Setup and configuration of the host machine
 
 1. Add RPM Fusion
