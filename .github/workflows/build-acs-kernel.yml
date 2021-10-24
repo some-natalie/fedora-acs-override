@@ -18,5 +18,5 @@ jobs:
       - name: Upload the RPMs as artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: kernel-${{ steps.build-rpms.output.kernel-version }}-acs-override-rpms
+          name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-acs-override-rpms
           path: /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
