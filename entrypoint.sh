@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Set environment variable
+echo "::set-output name=kernel-version::$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+')"
+
 # Download the latest kernel source RPM
 koji download-build --arch=src kernel-"$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+')".fc34.src.rpm
 
@@ -18,4 +21,4 @@ sed -i '/^Patch1:*/a Patch1000: add-acs-override.patch' ~/rpmbuild/SPECS/kernel.
 sed -i '/^ApplyOptionalPatch patch-*/a ApplyOptionalPatch add-acs-override.patch' ~/rpmbuild/SPECS/kernel.spec
 
 # Build the things!
-cd ~/rpmbuild/SPECS && rpmbuild -bb kernel.spec
+cd ~/rpmbuild/SPECS && rpmbuild -bb kernel.spec --without debug --without debuginfo
