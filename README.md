@@ -1,8 +1,8 @@
-# Fedora 34 + PCI passthrough
+# Fedora 35 + PCI passthrough
 
 ## Prerequisites
 
-- Fedora 34 (fresh install off the live USB image)
+- Fedora 35 (fresh install off the live USB image)
 - Computer with
   - Two graphics cards
   - Motherboard with the Intel 200 series chipset (Union Point) or newer
@@ -39,8 +39,8 @@
 1. (ACS only) - Install the kernel source and finish installing dependencies.
 
     ```shell
-    koji download-build --arch=src kernel-5.14.9-200.fc34.src.rpm
-    rpm -Uvh kernel-5.14.9-200.fc34.src.rpm
+    koji download-build --arch=src kernel-5.14.14-300.fc35.src.rpm
+    rpm -Uvh kernel-5.14.14-300.fc35.src.rpm
     cd rpmbuild/SPECS/
     sudo dnf builddep kernel.spec
     ```
