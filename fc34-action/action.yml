@@ -1,6 +1,6 @@
 name: 'Build ACS kernel'
 
-description: 'Build and upload the Fedora kernel RPMs with the ACS override patch'
+description: 'Build Fedora 34 kernel RPMs with ACS override patch'
 
 outputs:
   kernel-version:

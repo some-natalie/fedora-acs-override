@@ -4,33 +4,33 @@ on:
   workflow_dispatch:
 
 jobs:
-  # build-fc35:
-  #   runs-on: ubuntu-latest
-  #   name: Build the Fedora 35 kernel with the ACS override patch in this repo
-  #   steps:
-  #     - name: Checkout this repo
-  #       uses: actions/checkout@v2
+  build-fc35:
+    runs-on: ubuntu-latest
+    name: Build Fedora 35 kernel with ACS override patch
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v2
 
-  #     - name: Build the Fedora 35 RPMs
-  #       id: build-rpms
-  #       uses: ./
+      - name: Build the Fedora 35 RPMs
+        id: build-rpms
+        uses: ./fc35-action
 
-  #     - name: Upload the RPMs as artifacts
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-acs-override-rpms
-  #         path: /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
+      - name: Upload the RPMs as artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-acs-override-rpms
+          path: /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
 
   build-fc34:
     runs-on: ubuntu-latest
-    name: Build the Fedora 34 kernel with the ACS override patch in this repo
+    name: Build Fedora 34 kernel with ACS override patch
     steps:
       - name: Checkout this repo
         uses: actions/checkout@v2
 
       - name: Build the Fedora 34 RPMs
         id: build-rpms
-        uses: ./fc34
+        uses: ./fc34-action
 
       - name: Upload the RPMs as artifacts
         uses: actions/upload-artifact@v2
