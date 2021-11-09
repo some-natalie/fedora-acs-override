@@ -4,10 +4,10 @@
 echo "::set-output name=kernel-version::$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+')"
 
 # Download the latest kernel source RPM
-koji download-build --arch=src kernel-"$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+')".fc34.src.rpm
+koji download-build --arch=src kernel-"$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+.fc[0-9][0-9]')".src.rpm
 
 # Install the latest kernel source RPM
-rpm -Uvh kernel-"$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+')".fc34.src.rpm
+rpm -Uvh kernel-"$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+.fc[0-9][0-9]')".src.rpm
 
 # Install the build dependencies
 cd ~/rpmbuild/SPECS/ && dnf builddep kernel.spec
