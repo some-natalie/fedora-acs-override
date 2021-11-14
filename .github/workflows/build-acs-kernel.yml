@@ -11,6 +11,16 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@v2
 
+      - name: Free up disk space
+        run: |
+          sudo apt-get -qq purge build-essential "ghc*"
+          sudo apt-get clean
+          # cleanup docker images not used by us
+          docker system prune -af
+          # free up a lot of stuff from /usr/local
+          sudo rm -rf /usr/local
+          df -h
+
       - name: Build the Fedora 35 RPMs
         id: build-rpms
         uses: ./fc35-action
