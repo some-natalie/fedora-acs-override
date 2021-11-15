@@ -25,11 +25,13 @@ jobs:
         id: build-rpms
         uses: ./fc35-action
 
-      - name: Upload the RPMs as artifacts
+      - name: Upload the RPMs as artifacts, omitting the debug RPMs
         uses: actions/upload-artifact@v2
         with:
           name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc35-acs-override-rpms
-          path: /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
+          path: |
+            /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
+            !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*debug*.rpm
 
   build-fc34:
     runs-on: ubuntu-latest
