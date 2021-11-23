@@ -11,15 +11,27 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@v2
 
+      - name: Free up disk space
+        run: |
+          sudo apt-get -qq purge build-essential "ghc*"
+          sudo apt-get clean
+          # cleanup docker images not used by us
+          docker system prune -af
+          # free up a lot of stuff from /usr/local
+          sudo rm -rf /usr/local
+          df -h
+
       - name: Build the Fedora 35 RPMs
         id: build-rpms
         uses: ./fc35-action
 
-      - name: Upload the RPMs as artifacts
+      - name: Upload the RPMs as artifacts, omitting the debug RPMs
         uses: actions/upload-artifact@v2
         with:
           name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc35-acs-override-rpms
-          path: /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
+          path: |
+            /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
+            !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*debug*.rpm
 
   build-fc34:
     runs-on: ubuntu-latest
