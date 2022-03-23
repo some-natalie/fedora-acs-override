@@ -9,7 +9,7 @@ jobs:
     name: Build Fedora 35 kernel with ACS override patch
     steps:
       - name: Checkout this repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Free up disk space
         run: |
@@ -26,7 +26,7 @@ jobs:
         uses: ./fc35-action
 
       - name: Upload the RPMs as artifacts, omitting the debug RPMs
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc35-acs-override-rpms
           path: |
@@ -38,7 +38,7 @@ jobs:
     name: Build Fedora 34 kernel with ACS override patch
     steps:
       - name: Checkout this repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Free up disk space
         run: |
@@ -55,7 +55,7 @@ jobs:
         uses: ./fc34-action
 
       - name: Upload the RPMs as artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc34-acs-override-rpms
           path: /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
