@@ -1,9 +1,36 @@
 name: Build RPMs
 
-on: 
+on:
   workflow_dispatch:
 
 jobs:
+  build-fc36:
+    runs-on: ubuntu-latest
+    name: Build Fedora 36 kernel with ACS override patch
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v3
+
+      - name: Free up disk space
+        run: |
+          sudo apt-get -qq purge build-essential "ghc*"
+          sudo apt-get clean
+          # cleanup docker images not used by us
+          docker system prune -af
+          # free up a lot of stuff from /usr/local
+          sudo rm -rf /usr/local
+          df -h
+
+      - name: Build the Fedora 36 RPMs
+        id: build-rpms
+        uses: ./fc36-action
+
+      - name: Upload the RPMs as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc36-acs-override-rpms
+          path: /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
+
   build-fc35:
     runs-on: ubuntu-latest
     name: Build Fedora 35 kernel with ACS override patch
