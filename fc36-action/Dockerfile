@@ -12,8 +12,8 @@ RUN dnf update -y && dnf clean all
 # Install build dependencies
 RUN dnf install -y fedpkg fedora-packager rpmdevtools ncurses-devel pesign \
     bpftool bc bison dwarves elfutils-devel flex gcc gcc-c++ gcc-plugin-devel \
-    hostname m4 make net-tools openssl openssl-devel perl-devel \
-    perl-generators python3-devel \
+    glibc-static hostname m4 make net-tools openssl openssl-devel perl-devel \
+    perl-generators python3-devel which \
     && dnf clean all
 
 # Setup build directory

@@ -10,7 +10,7 @@ koji download-build --arch=src kernel-"$(dnf list kernel | grep -Eo '[0-9]\.[0-9
 rpm -Uvh kernel-"$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+.fc[0-9][0-9]')".src.rpm
 
 # Install the build dependencies
-cd ~/rpmbuild/SPECS/ && dnf builddep kernel.spec
+cd ~/rpmbuild/SPECS/ && dnf builddep kernel.spec -y
 
 # Download the ACS override patch
 curl -o ~/rpmbuild/SOURCES/add-acs-override.patch https://raw.githubusercontent.com/some-natalie/fedora-acs-override/main/acs/add-acs-override.patch 
