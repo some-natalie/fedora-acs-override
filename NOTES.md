@@ -4,7 +4,7 @@ Here are various notes and such that don't belong in the README but don't have a
 
 ## Kernel 5.14.x notes
 
-In Fedora 34, as of kernel 5.14.x, [Intel TSX](https://en.wikipedia.org/wiki/Transactional_Synchronization_Extensions) (transactional synchronization extensions) is disabled on more CPUs for security reasons.  You can read up more on the security implications [here](https://www.phoronix.com/scan.php?page=news_item&px=Intel-TSX-Off-New-Microcode).
+As of kernel 5.14.x, [Intel TSX](https://en.wikipedia.org/wiki/Transactional_Synchronization_Extensions) (transactional synchronization extensions) is disabled on more CPUs for security reasons.  You can read up more on the security implications [here](https://www.phoronix.com/scan.php?page=news_item&px=Intel-TSX-Off-New-Microcode).
 
 If your VM fails to launch with some variety of the message `Host CPU does not provide required features: rtm, hle`, but only after moving from kernel 5.13.x to 5.14.x, there's a good chance you have an effected CPU.  The two things libvirt is complaining about are dependent on TSX - Restricted Transactional Memory (RTM) and Hardware Lock Elision (HLE).
 
