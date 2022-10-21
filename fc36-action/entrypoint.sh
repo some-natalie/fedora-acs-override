@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set environment variable
-echo "::set-output name=kernel-version::$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+')"
+echo "{kernel-version}={$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+')}" >> $GITHUB_OUTPUT
 
 # Download the latest kernel source RPM
 koji download-build --arch=src kernel-"$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+.fc[0-9][0-9]')".src.rpm
