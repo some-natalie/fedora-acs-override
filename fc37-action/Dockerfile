@@ -1,4 +1,4 @@
-FROM fedora:35
+FROM fedora:37
 
 # Add RPM Fusion
 RUN dnf install -y \
