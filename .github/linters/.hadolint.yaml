@@ -1,0 +1,7 @@
+ignored:
+  - DL3041 # dnf should not pin all package versions
+
+trustedRegistries:
+  - docker.io
+  - quay.io
+  - ghcr.io
