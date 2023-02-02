@@ -21,4 +21,4 @@ sed -i '/^Patch1:*/a Patch1000: add-acs-override.patch' ~/rpmbuild/SPECS/kernel.
 sed -i '/^ApplyOptionalPatch patch-*/a ApplyOptionalPatch add-acs-override.patch' ~/rpmbuild/SPECS/kernel.spec
 
 # Build the things!
-cd ~/rpmbuild/SPECS && rpmbuild -bb kernel.spec --target x86_64 --nodeps
+cd ~/rpmbuild/SPECS && rpmbuild -bb kernel.spec --without debug --without debuginfo --target x86_64 --nodeps
