@@ -4,6 +4,35 @@ on:
   workflow_dispatch:
 
 jobs:
+  build-fc38:
+    runs-on: ubuntu-latest
+    name: Build Fedora 38 kernel with ACS override patch
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v3
+
+      - name: Free up disk space
+        run: |
+          sudo apt-get -qq purge build-essential "ghc*"
+          sudo apt-get clean
+          # cleanup docker images not used by us
+          docker system prune -af
+          # free up a lot of stuff from /usr/local
+          sudo rm -rf /usr/local
+          df -h
+
+      - name: Build the Fedora 38 RPMs
+        id: build-rpms
+        uses: ./fc38-action
+
+      - name: Upload the RPMs as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc38-acs-override-rpms
+          path: |
+            /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
+            !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*debug*.rpm
+
   build-fc37:
     runs-on: ubuntu-latest
     name: Build Fedora 37 kernel with ACS override patch
