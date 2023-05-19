@@ -1,8 +1,8 @@
-# Fedora 36 + PCI passthrough
+# Fedora 38 + PCI passthrough
 
 ## Prerequisites
 
-- Fedora 36 (fresh install off the live USB image)
+- Fedora 38 (fresh install off the live USB image)
 - Computer with
   - Two graphics cards
   - Motherboard with the Intel 200 series chipset (Union Point) or newer
@@ -40,8 +40,8 @@
 1. (ACS only) - Install the kernel source and finish installing dependencies.
 
     ```shell
-    koji download-build --arch=src kernel-5.17.12-300.fc36.src.rpm
-    rpm -Uvh kernel-5.17.12-300.fc36.src.rpm
+    koji download-build --arch=src kernel-6.2.15-300.fc38.src.rpm
+    rpm -Uvh kernel-6.2.15-300.fc38.src.rpm
     cd rpmbuild/SPECS/
     sudo dnf builddep kernel.spec
     ```
@@ -82,7 +82,7 @@
 
     ```shell
     cd ~/rpmbuild/RPMS/x86_64
-    sudo dnf update *.rpm
+    sudo dnf localinstall *.rpm
     ```
 
     :information_source:  You should now have at least the following packages installed:  `kernel`, `kernel-core`, `kernel-devel`, `kernel-modules`, and `kernel-modules-extra`.
@@ -213,4 +213,4 @@
 
 ## Disclaimer
 
-I put this together based on my own machine at home because I knew I'd forget this process if I ever had to do it again.  There was a lot of reading of Bugzilla, StackOverflow, and a bunch of blogs/forums/mailing lists all over the internet.  Thanks to everyone who did something similar so I could cobble together something from all of them that Works On My Machine.  This is by no means the only way to solve the problem.  :)
+I put this together based on my own machine at home because I knew I'd forget this process if I ever had to do it again.  There was a lot of reading of Bugzilla, StackOverflow, and a bunch of blogs/forums/mailing lists all over the internet.  Thanks to everyone who did something similar so I could cobble together something from all of them that Works On My Machine.  This is by no means the only way to solve the problem.  :smiley:

@@ -6,7 +6,7 @@
 
 ## Supported Versions
 
-I make a best effort to keep up to date with the latest Fedora release and kernel, but please don't assume this is anything more than a hobbyist tinkering around in the kernel for fun. :)
+I make a best effort to keep up to date with the latest Fedora release and kernel, but please don't assume this is anything more than a hobbyist tinkering around in the kernel for fun. :heart:
 
 ## Reporting a Vulnerability
 
