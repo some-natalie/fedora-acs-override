@@ -11,6 +11,7 @@ on:
 jobs:
   build-fc39:
     strategy:
+      fail-fast: false
       matrix:
         runner-size:
           [
@@ -37,15 +38,16 @@ jobs:
         with:
           debug-build: ${{ matrix.debug }}
 
-      - name: Upload the RPMs as artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc39-acs-override-rpms
-          path: |
-            /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
+      # - name: Upload the RPMs as artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc39-acs-override-rpms
+      #     path: |
+      #       /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
 
   build-fc38:
     strategy:
+      fail-fast: false
       matrix:
         runner-size:
           [
@@ -72,15 +74,16 @@ jobs:
         with:
           debug-build: ${{ matrix.debug }}
 
-      - name: Upload the RPMs as artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc38-acs-override-rpms
-          path: |
-            /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
+      # - name: Upload the RPMs as artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc38-acs-override-rpms
+      #     path: |
+      #       /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
 
   build-fc37:
     strategy:
+      fail-fast: false
       matrix:
         runner-size:
           [
@@ -107,9 +110,9 @@ jobs:
         with:
           debug-build: ${{ matrix.debug }}
 
-      - name: Upload the RPMs as artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc37-acs-override-rpms
-          path: |
-            /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
+      # - name: Upload the RPMs as artifacts
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc37-acs-override-rpms
+      #     path: |
+      #       /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
