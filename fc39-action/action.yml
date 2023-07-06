@@ -1,6 +1,6 @@
 name: "Build ACS kernel"
 
-description: "Build Fedora 38 kernel RPMs with ACS override patch"
+description: "Build Fedora 39 (rawhide) kernel RPMs with ACS override patch"
 
 inputs:
   debug-build:

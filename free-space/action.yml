@@ -1,0 +1,24 @@
+name: "Free disk space on the runners"
+
+description: "Free disk space on the runners for RPMs to build"
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Clean up apt packages"
+      shell: bash
+      run: |
+        sudo apt-get -qq purge build-essential "ghc*"
+        sudo apt-get clean
+    - name: "Clean up Docker images"
+      shell: bash
+      run: |
+        docker system prune -af
+    - name: "Free up more space out of /usr/local"
+      shell: bash
+      run: |
+        sudo rm -rf /usr/local
+    - name: "Show disk space"
+      shell: bash
+      run: |
+        df -h
