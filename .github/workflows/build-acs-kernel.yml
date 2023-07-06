@@ -6,7 +6,7 @@ on:
       debug:
         description: "Whether to build the debug RPMs too, use a string 'true' or 'false'"
         type: string
-        required: true
+        required: false
 
 jobs:
   build-fc39:
