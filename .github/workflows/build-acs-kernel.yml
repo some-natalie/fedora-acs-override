@@ -2,6 +2,11 @@ name: Build RPMs
 
 on:
   workflow_dispatch:
+    inputs:
+      debug:
+        description: "Whether to build the debug RPMs too, use a string 'true' or 'false'"
+        type: string
+        required: true
 
 jobs:
   build-fc39:
