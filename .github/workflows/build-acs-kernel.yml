@@ -9,7 +9,7 @@ jobs:
     name: Build Fedora 38 kernel with ACS override patch
     steps:
       - name: Checkout this repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Free up disk space
         run: |
@@ -38,7 +38,7 @@ jobs:
     name: Build Fedora 37 kernel with ACS override patch
     steps:
       - name: Checkout this repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Free up disk space
         run: |
