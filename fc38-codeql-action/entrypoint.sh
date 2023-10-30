@@ -21,6 +21,7 @@ sed -i '/^Patch1:*/a Patch1000: add-acs-override.patch' ~/rpmbuild/SPECS/kernel.
 sed -i '/^ApplyOptionalPatch patch-*/a ApplyOptionalPatch add-acs-override.patch' ~/rpmbuild/SPECS/kernel.spec
 
 # Setup CodeQL
+PATH=$PATH:/usr/local/codeql-home/codeql
 codeql resolve languages
 codeql resolve qlpacks
 
