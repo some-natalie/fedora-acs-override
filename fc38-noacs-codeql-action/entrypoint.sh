@@ -19,8 +19,8 @@ codeql resolve qlpacks
 
 # Build and scan the things!
 cd ~/rpmbuild/SPECS &&\
-  codeql database create cpp-database --language=c-cpp \
+  codeql database create c-cpp-database --language=c-cpp \
   --command 'rpmbuild -bb kernel.spec --without debug --without debuginfo --target x86_64 --nodeps'
 
 # Analyze the things
-codeql database analyze ~/rpmbuild/SPECS/cpp-database --format=sarif-latest --output=/workspace/source/c-cpp-results.sarif
+codeql database analyze ~/rpmbuild/SPECS/c-cpp-database --format=sarif-latest --output=/workspace/source/c-cpp-results.sarif
