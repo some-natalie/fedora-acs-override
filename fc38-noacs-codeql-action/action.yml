@@ -1,0 +1,11 @@
+name: "Build kernel w/o ACS override patch"
+
+description: "Build Fedora 38 kernel RPMs without the ACS override patch"
+
+outputs:
+  kernel-version:
+    description: "The version of the kernel RPMs"
+
+runs:
+  using: "docker"
+  image: "Dockerfile"

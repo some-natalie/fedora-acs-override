@@ -1,0 +1,19 @@
+name: "Build ACS kernel"
+
+description: "Build Fedora 38 kernel RPMs with ACS override patch, scanned by CodeQL"
+
+inputs:
+  debug-build:
+    description: "Whether to build debug RPMs, change to 'true' to build them"
+    required: true
+    default: "false"
+
+outputs:
+  kernel-version:
+    description: "The version of the kernel RPMs"
+
+runs:
+  using: "docker"
+  image: "Dockerfile"
+  args:
+    - ${{ inputs.debug-build }}

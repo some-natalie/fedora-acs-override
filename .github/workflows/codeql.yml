@@ -1,0 +1,73 @@
+name: CodeQL tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-fc38-noacs:
+    strategy:
+      fail-fast: false
+    runs-on: jammy-64core
+    name: Build Fedora 38 kernel without ACS override patch
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v3
+
+      - name: Free up disk space
+        uses: ./free-space
+
+      - name: Build the Fedora 38 RPMs
+        id: build-rpms
+        uses: ./fc38-noacs-codeql-action
+
+      - name: Upload the RPMs as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc38-acs-override-rpms
+          path: |
+            /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
+            /home/runner/work/_temp/_github_home/rpmbuild/SPECS/cpp-database
+            /workspace/source/c-cpp-results
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          # Path to SARIF file relative to the root of the repository
+          sarif_file: /workspace/source/c-cpp-results.sarif
+          # Optional category for the results
+          # Used to differentiate multiple results for one commit
+          category: noacs-results
+
+  build-fc38:
+    strategy:
+      fail-fast: false
+    runs-on: jammy-64core
+    name: Build Fedora 38 kernel with ACS override patch
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v3
+
+      - name: Free up disk space
+        uses: ./free-space
+
+      - name: Build the Fedora 38 RPMs
+        id: build-rpms
+        uses: ./fc38-codeql-action
+
+      - name: Upload the RPMs as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc38-acs-override-rpms
+          path: |
+            /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
+            /home/runner/work/_temp/_github_home/rpmbuild/SPECS/cpp-database
+            /workspace/source/c-cpp-results.sarif
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          # Path to SARIF file relative to the root of the repository
+          sarif_file: /workspace/source/c-cpp-results.sarif
+          # Optional category for the results
+          # Used to differentiate multiple results for one commit
+          category: acs-results
