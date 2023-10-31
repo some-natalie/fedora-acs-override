@@ -13,7 +13,7 @@ rpm -Uvh kernel-"$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+.fc[0
 cd ~/rpmbuild/SPECS/ && dnf builddep kernel.spec -y
 
 # Setup CodeQL
-PATH=$PATH:/usr/local/codeql-home/codeql
+# PATH=$PATH:/usr/local/codeql-home/codeql
 codeql resolve languages
 codeql resolve qlpacks
 
