@@ -21,14 +21,14 @@ sed -i '/^Patch1:*/a Patch1000: add-acs-override.patch' ~/rpmbuild/SPECS/kernel.
 sed -i '/^ApplyOptionalPatch patch-*/a ApplyOptionalPatch add-acs-override.patch' ~/rpmbuild/SPECS/kernel.spec
 
 # Setup CodeQL
-# PATH=$PATH:/usr/local/codeql-home/codeql
 codeql resolve languages
 codeql resolve qlpacks
 
 # Build and scan the things!
 cd ~/rpmbuild/SPECS &&\
-  codeql database create cpp-database --language=cpp \
+  codeql database create cpp-database --language=cpp --threads=62 --ram=250000 \
   --command 'rpmbuild -bb kernel.spec --without debug --without debuginfo --target x86_64 --nodeps'
 
 # Analyze the things
-codeql database analyze ~/rpmbuild/SPECS/cpp-database --format=sarif-latest --output=/workspace/source/cpp-results.sarif
+codeql database analyze ~/rpmbuild/SPECS/cpp-database --threads=62 --ram=250000 \
+  --format=sarif-latest --output=/workspace/source/cpp-results.sarif

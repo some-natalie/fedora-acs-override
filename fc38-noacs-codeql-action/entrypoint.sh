@@ -13,14 +13,14 @@ rpm -Uvh kernel-"$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+.fc[0
 cd ~/rpmbuild/SPECS/ && dnf builddep kernel.spec -y
 
 # Setup CodeQL
-# PATH=$PATH:/usr/local/codeql-home/codeql
 codeql resolve languages
 codeql resolve qlpacks
 
 # Build and scan the things!
 cd ~/rpmbuild/SPECS &&\
-  codeql database create cpp-database --language=cpp \
+  codeql database create cpp-database --language=cpp --threads=62 --ram=250000 \
   --command 'rpmbuild -bb kernel.spec --without debug --without debuginfo --target x86_64 --nodeps'
 
 # Analyze the things
-codeql database analyze ~/rpmbuild/SPECS/cpp-database --format=sarif-latest --output=/workspace/source/cpp-results.sarif
+codeql database analyze ~/rpmbuild/SPECS/cpp-database --threads=62 --ram=250000 \
+  --format=sarif-latest --output=/workspace/source/cpp-results.sarif
