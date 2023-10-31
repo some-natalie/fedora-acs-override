@@ -19,6 +19,16 @@ RUN dnf install -y fedpkg fedora-packager rpmdevtools ncurses-devel pesign \
 # Setup build directory
 RUN rpmdev-setuptree
 
+# Setup CodeQL
+ENV CODEQL_HOME /usr/local/codeql-home
+RUN mkdir -p ${CODEQL_HOME}
+
+RUN wget -O codeql-bundle.tar.gz https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.15.1/codeql-bundle-linux64.tar.gz &&\
+    tar -xvzf codeql-bundle.tar.gz &&\
+    cp -R ./codeql ${CODEQL_HOME}
+
+ENV PATH="${CODEQL_HOME}/codeql:${PATH}"
+
 # Set up the entrypoint script
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
