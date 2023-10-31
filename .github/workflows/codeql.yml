@@ -27,13 +27,13 @@ jobs:
           path: |
             /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
             /home/runner/work/_temp/_github_home/rpmbuild/SPECS/cpp-database
-            /workspace/source/c-cpp-results
+            /workspace/source/cpp-results.sarif
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v2
         with:
           # Path to SARIF file relative to the root of the repository
-          sarif_file: /workspace/source/c-cpp-results.sarif
+          sarif_file: /workspace/source/cpp-results.sarif
           # Optional category for the results
           # Used to differentiate multiple results for one commit
           category: noacs-results
@@ -61,13 +61,13 @@ jobs:
           path: |
             /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
             /home/runner/work/_temp/_github_home/rpmbuild/SPECS/cpp-database
-            /workspace/source/c-cpp-results.sarif
+            /workspace/source/cpp-results.sarif
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v2
         with:
           # Path to SARIF file relative to the root of the repository
-          sarif_file: /workspace/source/c-cpp-results.sarif
+          sarif_file: /workspace/source/cpp-results.sarif
           # Optional category for the results
           # Used to differentiate multiple results for one commit
           category: acs-results
