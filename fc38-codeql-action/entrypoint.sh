@@ -31,4 +31,4 @@ cd ~/rpmbuild/SPECS &&\
 
 # Analyze the things
 codeql database analyze ~/rpmbuild/SPECS/cpp-database --threads=62 --ram=250000 \
-  --format=sarif-latest --output=/workspace/source/cpp-results.sarif
+  --format=sarif-latest --output=~/rpmbuild/SPECS/cpp-results.sarif
