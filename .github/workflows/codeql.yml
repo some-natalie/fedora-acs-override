@@ -23,7 +23,6 @@ jobs:
           name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc38-rpms
           path: |
             /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
-            /home/runner/work/_temp/_github_home/rpmbuild/SPECS/cpp-database
             /home/runner/work/_temp/_github_home/rpmbuild/SPECS/cpp-results.sarif
 
       - name: Upload SARIF file
@@ -54,7 +53,6 @@ jobs:
           name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc38-acs-override-rpms
           path: |
             /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
-            /home/runner/work/_temp/_github_home/rpmbuild/SPECS/cpp-database
             /home/runner/work/_temp/_github_home/rpmbuild/SPECS/cpp-results.sarif
 
       - name: Upload SARIF file
