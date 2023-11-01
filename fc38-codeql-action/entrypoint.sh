@@ -25,10 +25,11 @@ codeql resolve languages
 codeql resolve qlpacks
 
 # Build and scan the things!
-cd ~/rpmbuild/SPECS &&\
+cd ~/rpmbuild/SPECS && \
   codeql database create cpp-database --language=cpp --threads=62 --ram=250000 \
   --command 'rpmbuild -bb kernel.spec --without debug --without debuginfo --target x86_64 --nodeps'
 
 # Analyze the things
-codeql database analyze ~/rpmbuild/SPECS/cpp-database --threads=62 --ram=250000 \
-  --format=sarif-latest --output=~/rpmbuild/SPECS/cpp-results.sarif
+cd ~/rpmbuild/SPECS && \
+  codeql database analyze cpp-database --threads=62 --ram=250000 \
+  --format=sarif-latest --output=cpp-results.sarif

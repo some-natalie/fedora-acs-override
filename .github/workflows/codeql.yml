@@ -13,9 +13,6 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@v3
 
-      - name: Free up disk space
-        uses: ./free-space
-
       - name: Build the Fedora 38 RPMs
         id: build-rpms
         uses: ./fc38-noacs-codeql-action
@@ -46,9 +43,6 @@ jobs:
     steps:
       - name: Checkout this repo
         uses: actions/checkout@v3
-
-      - name: Free up disk space
-        uses: ./free-space
 
       - name: Build the Fedora 38 RPMs
         id: build-rpms
