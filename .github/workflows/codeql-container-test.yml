@@ -1,0 +1,85 @@
+name: CodeQL, but in CONTAINERS
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-fc38:
+    strategy:
+      fail-fast: false
+    runs-on: jammy-64core
+    container:
+      image: fedora:38
+    name: Build Fedora 38 kernel with ACS override patch
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v3
+
+      - name: Install RPM Fusion
+        shell: bash
+        run: |
+          dnf install -y \
+          https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-"$(rpm -E %fedora)".noarch.rpm \
+          https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-"$(rpm -E %fedora)".noarch.rpm \
+          && dnf clean all
+
+      - name: Run updates
+        shell: bash
+        run: |
+          dnf update -y && dnf clean all
+
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          dnf install -y fedpkg fedora-packager rpmdevtools ncurses-devel pesign \
+          bpftool bc bison dwarves elfutils-devel flex gcc gcc-c++ gcc-plugin-devel \
+          glibc-static hostname m4 make net-tools openssl openssl-devel perl-devel \
+          perl-generators python3-devel which kernel-rpm-macros \
+          && dnf clean all
+
+      - name: RPM setup
+        shell: bash
+        run: |
+          rpmdev-setuptree
+
+      - name: Set environment variable for kernel version
+        shell: bash
+        run: |
+          echo "kernel-version=$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+')" >> $GITHUB_OUTPUT
+
+      - name: Download and install latest kernel source RPM
+        shell: bash
+        run: |
+          koji download-build --arch=src kernel-"$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+.fc[0-9][0-9]')".src.rpm
+          rpm -Uvh kernel-"$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+.fc[0-9][0-9]')".src.rpm
+
+      - name: Install the build dependencies
+        shell: bash
+        run: |
+          cd ~/rpmbuild/SPECS/ && dnf builddep kernel.spec -y
+
+      - name: Set up the ACS override patch
+        shell: bash
+        run: |
+          curl -o ~/rpmbuild/SOURCES/add-acs-override.patch https://raw.githubusercontent.com/some-natalie/fedora-acs-override/main/acs/add-acs-override.patch
+          sed -i 's/# define buildid .local/%define buildid .acs/g' ~/rpmbuild/SPECS/kernel.spec
+          sed -i '/^Patch1:*/a Patch1000: add-acs-override.patch' ~/rpmbuild/SPECS/kernel.spec
+          sed -i '/^ApplyOptionalPatch patch-*/a ApplyOptionalPatch add-acs-override.patch' ~/rpmbuild/SPECS/kernel.spec
+
+      - name: Setup CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: cpp
+          threads: 62
+          ram: 250000
+
+      - name: Build the RPMs
+        shell: bash
+        run: |
+          cd ~/rpmbuild/SPECS && rpmbuild -bb kernel.spec --without debug --without debuginfo --target x86_64 --nodeps
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          threads: 62
+          ram: 250000
