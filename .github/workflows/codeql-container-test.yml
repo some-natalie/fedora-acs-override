@@ -70,8 +70,8 @@ jobs:
         uses: github/codeql-action/init@v2
         with:
           languages: cpp
-          threads: 62
-          ram: 250000
+          threads: 32
+          ram: 125000
 
       - name: Build the RPMs
         shell: bash
@@ -81,5 +81,5 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
         with:
-          threads: 62
-          ram: 250000
+          threads: 32
+          ram: 125000
