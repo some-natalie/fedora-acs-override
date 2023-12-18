@@ -26,7 +26,7 @@ jobs:
         uses: ./fc39-action
 
       - name: Upload the RPMs as artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc39-acs-override-rpms
           path: |
@@ -55,7 +55,7 @@ jobs:
         uses: ./fc38-action
 
       - name: Upload the RPMs as artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc38-acs-override-rpms
           path: |
@@ -84,7 +84,7 @@ jobs:
         uses: ./fc37-action
 
       - name: Upload the RPMs as artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc37-acs-override-rpms
           path: |
