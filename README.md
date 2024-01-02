@@ -1,16 +1,19 @@
-# Fedora 38 + PCI passthrough
+# Fedora 39 + PCI passthrough
+
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/some-natalie/fedora-acs-override/badge)](https://securityscorecards.dev/viewer/?uri=github.com/some-natalie/fedora-acs-override) (more about this metric and what it means at [securityscorecards.dev](https://securityscorecards.dev/))
 
 ## Prerequisites
 
-- Fedora 38 (fresh install off the live USB image)
+- Fedora 39 (fresh install off the live USB image)
 - Computer with
   - Two graphics cards
   - Motherboard with the Intel 200 series chipset (Union Point) or newer
 - A fresh backup of anything you don't care to lose
 
-:information_source:  The two graphics cards can be different models.  If your cards are identical, you'll need to do some extra steps that are prefaced with (ACS only).  These steps include compiling your own kernel to include Alex Williamson's patch to allow any PCIe device to use Access Control Services.  More information on this patch, why it's necessary, and what it does available [here](https://lkml.org/lkml/2013/5/30/513).  If your cards aren't identical, skip these steps.
+> [!TIP]
+> The two graphics cards can be different models.  If your cards are identical, you'll need to do some extra steps that are prefaced with (ACS only).  These steps include compiling your own kernel to include Alex Williamson's patch to allow any PCIe device to use Access Control Services.  More information on this patch, why it's necessary, and what it does available [here](https://lkml.org/lkml/2013/5/30/513).  If your cards aren't identical, skip these steps.
 
-> **Warning**
+> [!WARNING]
 > Having problems since kernel 5.14.x?  Check out the [notes](NOTES.md)!
 
 :new:  Just want the RPMs?  Go to the [latest workflow run](https://github.com/some-natalie/fedora-acs-override/actions/workflows/build-acs-kernel.yml) and download the RPMs as a build artifact, as shown below:
