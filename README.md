@@ -1,6 +1,6 @@
 # Fedora 39 + PCI passthrough
 
-> [!INFO]
+> [!NOTE]
 > [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/some-natalie/fedora-acs-override/badge)](https://securityscorecards.dev/viewer/?uri=github.com/some-natalie/fedora-acs-override) (more about this metric and what it means at [securityscorecards.dev](https://securityscorecards.dev/)) - track progress on anything surfaced by it [here](https://github.com/some-natalie/fedora-acs-override/issues)
 
 ## Prerequisites
