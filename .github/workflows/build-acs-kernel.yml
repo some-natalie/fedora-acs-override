@@ -2,6 +2,8 @@ name: Build RPMs
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "25 5 * * 0" # 5:25 am UTC on Sundays
 
 jobs:
   build-fc39:
