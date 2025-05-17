@@ -8,3 +8,13 @@ updates:
       actions:
         patterns:
           - "*"
+
+  - package-ecosystem: docker
+    directory: /fc41-action
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /fc42-action
+    schedule:
+      interval: daily
