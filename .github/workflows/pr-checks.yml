@@ -39,7 +39,7 @@ jobs:
   build-dependabot-PRs:
     name: Build the kernel RPMs, if the PR is from Dependabot
     runs-on: ubuntu-latest
-    if: ${{ github.actor == 'dependabot[bot]' }}
+    if: ${{ github.actor == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository }}
     steps:
       - name: Build the FC42 kernel RPMs
         uses: ./fc42-action
