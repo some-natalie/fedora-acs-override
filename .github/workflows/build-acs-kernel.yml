@@ -5,8 +5,12 @@ on:
   schedule:
     - cron: "25 5 * * 0" # 5:25 am UTC on Sundays
 
+permissions: read-all
+
 jobs:
   build-fc42:
+    permissions:
+      actions: write # to allow the workflow to upload artifacts
     runs-on: ubuntu-latest
     name: Build Fedora 42 kernel with ACS override patch
     steps:
@@ -41,6 +45,8 @@ jobs:
             !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*debug*.rpm
 
   build-fc41:
+    permissions:
+      actions: write # to allow the workflow to upload artifacts
     runs-on: ubuntu-latest
     name: Build Fedora 41 kernel with ACS override patch
     steps:

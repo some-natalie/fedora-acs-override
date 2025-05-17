@@ -1,11 +1,11 @@
-# Fedora 41 + PCI passthrough
+# Fedora 42 + PCI passthrough
 
 > [!NOTE]
 > [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/some-natalie/fedora-acs-override/badge)](https://securityscorecards.dev/viewer/?uri=github.com/some-natalie/fedora-acs-override) (more about this metric and what it means at [securityscorecards.dev](https://securityscorecards.dev/)) - track progress on anything surfaced by it [here](https://github.com/some-natalie/fedora-acs-override/issues)
 
 ## Prerequisites
 
-- Fedora 41 (fresh install off the live USB image)
+- Fedora 42 (fresh install off the live USB image)
 - Computer with
   - Two graphics cards
   - Motherboard with the Intel 200 series chipset (Union Point) or newer

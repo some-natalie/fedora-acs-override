@@ -6,10 +6,16 @@ on:
       - opened
       - reopened
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   comment-on-pull-request:
     name: Comment on PR to set expectations
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write # to allow the workflow to comment on the PR
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
@@ -30,18 +36,19 @@ jobs:
   super-linter:
     name: Run the super-linter
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write # to allow the workflow to comment on the PR
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@0634a2670c59f64b4a01f0f96f84700a4088b9f0 # v2.12.0
         with:
           egress-policy: audit
-
       - name: Checkout Code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
       - name: Lint Code Base
-        uses: super-linter/super-linter@12150456a73e248bdc94d0794898f94e23127c88 # v7.4.0
+        uses: super-linter/super-linter@4e8a7c2bf106c4c766c816b35ec612638dc9b6b2 # v7.3.0
         env:
           VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: main
@@ -51,3 +58,30 @@ jobs:
           VALIDATE_MARKDOWN: true
           MARKDOWN_CONFIG_FILE: .markdownlint.json
           VALIDATE_BASH: true
+
+  build-dependabot-PRs:
+    name: Build the kernel RPMs, if the PR is from Dependabot
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    steps:
+      - name: Build the FC42 kernel RPMs
+        uses: ./fc42-action
+        id: build-fc42-rpms
+      - name: Build the FC41 kernel RPMs
+        uses: ./fc41-action
+        id: build-fc41-rpms
+
+  merge-dependabot-PRs:
+      name: Automatically merge Dependabot PRs
+      needs: [build-dependabot-PRs]
+      runs-on: ubuntu-latest
+      permissions:
+        pull-requests: write # to allow the workflow to merge the PR
+        contents: write # to allow the workflow to push changes
+      if: ${{ github.actor == 'dependabot[bot]' }}
+      steps:
+        - name: Enable auto-merge for Dependabot PRs
+          run: gh pr merge --auto --merge "$PR_URL"
+          env:
+            PR_URL: ${{github.event.pull_request.html_url}}
+            GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
