@@ -6,6 +6,35 @@ on:
     - cron: "25 5 * * 0" # 5:25 am UTC on Sundays
 
 jobs:
+  build-fc42:
+    runs-on: ubuntu-latest
+    name: Build Fedora 42 kernel with ACS override patch
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Free up disk space
+        run: |
+          sudo apt-get -qq purge build-essential "ghc*"
+          sudo apt-get clean
+          # cleanup docker images not used by us
+          docker system prune -af
+          # free up a lot of stuff from /usr/local
+          sudo rm -rf /usr/local
+          df -h
+
+      - name: Build the Fedora 42 RPMs
+        id: build-rpms
+        uses: ./fc42-action
+
+      - name: Upload the RPMs as artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc42-acs-override-rpms
+          path: |
+            /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
+            !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*debug*.rpm
+
   build-fc41:
     runs-on: ubuntu-latest
     name: Build Fedora 41 kernel with ACS override patch
@@ -31,35 +60,6 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc41-acs-override-rpms
-          path: |
-            /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
-            !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*debug*.rpm
-
-  build-fc40:
-    runs-on: ubuntu-latest
-    name: Build Fedora 40 kernel with ACS override patch
-    steps:
-      - name: Checkout this repo
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-
-      - name: Free up disk space
-        run: |
-          sudo apt-get -qq purge build-essential "ghc*"
-          sudo apt-get clean
-          # cleanup docker images not used by us
-          docker system prune -af
-          # free up a lot of stuff from /usr/local
-          sudo rm -rf /usr/local
-          df -h
-
-      - name: Build the Fedora 40 RPMs
-        id: build-rpms
-        uses: ./fc40-action
-
-      - name: Upload the RPMs as artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc40-acs-override-rpms
           path: |
             /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
             !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*debug*.rpm
