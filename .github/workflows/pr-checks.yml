@@ -6,7 +6,9 @@ on:
       - opened
       - reopened
 
-permissions: read-all
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   comment-on-pull-request:
