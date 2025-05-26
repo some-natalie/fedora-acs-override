@@ -4,17 +4,13 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    groups:
-      actions:
-        patterns:
-          - "*"
 
-  - package-ecosystem: docker
-    directory: /fc41-action
+  - package-ecosystem: "docker"
+    directory: "/fc41-action"
     schedule:
-      interval: daily
+      interval: "daily"
 
-  - package-ecosystem: docker
-    directory: /fc42-action
+  - package-ecosystem: "docker"
+    directory: "/fc42-action"
     schedule:
-      interval: daily
+      interval: "daily"
