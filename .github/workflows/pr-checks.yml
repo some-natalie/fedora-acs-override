@@ -57,16 +57,16 @@ jobs:
         uses: ./fc41-action
         id: build-fc41-rpms
 
-  merge-dependabot-PRs:
-      name: Automatically merge Dependabot PRs
-      needs: [build-dependabot-PRs]
-      runs-on: ubuntu-latest
-      permissions:
-        contents: write # to allow the workflow to push changes
-      if: ${{ github.actor == 'dependabot[bot]' }}
-      steps:
-        - name: Enable auto-merge for Dependabot PRs
-          run: gh pr merge --auto --merge "$PR_URL"
-          env:
-            PR_URL: ${{github.event.pull_request.html_url}}
-            GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  # merge-dependabot-PRs:
+  #     name: Automatically merge Dependabot PRs
+  #     needs: [build-dependabot-PRs]
+  #     runs-on: ubuntu-latest
+  #     permissions:
+  #       contents: write # to allow the workflow to push changes
+  #     if: ${{ github.actor == 'dependabot[bot]' }}
+  #     steps:
+  #       - name: Enable auto-merge for Dependabot PRs
+  #         run: gh pr merge --auto --merge "$PR_URL"
+  #         env:
+  #           PR_URL: ${{github.event.pull_request.html_url}}
+  #           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
