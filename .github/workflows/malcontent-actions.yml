@@ -68,7 +68,9 @@ jobs:
             OLD_ACTION_DIR="${OLD_ACTION_DIR%@*}" # remove anything after the @
           else
             OLD_ACTION_ORG="${OLD_USE%%/*}"
-            OLD_ACTION_REPO="${OLD_USE%@*}"
+            OLD_ACTION_REPO="${OLD_USE#*/}"
+            OLD_ACTION_REPO="${OLD_ACTION_REPO%%/*}"
+            OLD_ACTION_REPO="${OLD_ACTION_REPO%@*}"
             OLD_ACTION_DIR=""
           fi
           OLD_REF="${OLD_USE##*@}"
@@ -87,7 +89,9 @@ jobs:
             NEW_ACTION_DIR="${NEW_ACTION_DIR%@*}" # remove anything after the @
           else
             NEW_ACTION_ORG="${NEW_USE%%/*}"
-            NEW_ACTION_REPO="${NEW_USE%@*}"
+            NEW_ACTION_REPO="${NEW_USE#*/}"
+            NEW_ACTION_REPO="${NEW_ACTION_REPO%%/*}"
+            NEW_ACTION_REPO="${NEW_ACTION_REPO%@*}"
             NEW_ACTION_DIR=""
           fi
           NEW_REF="${NEW_USE##*@}"
