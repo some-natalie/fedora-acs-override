@@ -207,7 +207,7 @@ jobs:
         id: malcontent
         shell: bash
         run: |
-          docker run --rm -v ${{ github.workspace }}:/tmp cgr.dev/chainguard/malcontent:latest --format=markdown --min-file-risk=high diff /tmp/prior-commit /tmp/current-commit >> malcontent-results.md
+          docker run --rm --user 0 -v ${{ github.workspace }}:/tmp cgr.dev/chainguard/malcontent:latest --format=markdown --min-file-risk=high diff /tmp/prior-commit /tmp/current-commit >> malcontent-results.md
 
       - name: Add comment if results are empty
         shell: bash
