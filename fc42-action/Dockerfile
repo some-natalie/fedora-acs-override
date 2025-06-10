@@ -1,4 +1,4 @@
-FROM fedora:42@sha256:ef2fe4d8a16d5cd293f223d84d17feb70f02faf409a95300a44e46d21ce34b2b
+FROM fedora:42@sha256:16ca3e34a9545583551589e71882f1f27cbce3c2f1fc6210c932d22a6931b73b
 
 # Add RPM Fusion
 RUN dnf install -y \
