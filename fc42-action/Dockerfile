@@ -2,19 +2,20 @@ FROM fedora:42@sha256:aa7befe5cfd1f0e062728c16453cd1c479d4134c7b85eac00172f3025a
 
 # Add RPM Fusion
 RUN dnf install -y \
-    https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-"$(rpm -E %fedora)".noarch.rpm \
-    https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-"$(rpm -E %fedora)".noarch.rpm \
-    && dnf clean all
+  https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-"$(rpm -E %fedora)".noarch.rpm \
+  https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-"$(rpm -E %fedora)".noarch.rpm \
+  && dnf clean all
 
 # Update
 RUN dnf update -y && dnf clean all
 
 # Install build dependencies
 RUN dnf install -y fedpkg fedora-packager rpmdevtools ncurses-devel pesign \
-    bpftool bc bison dwarves elfutils-devel flex gcc gcc-c++ gcc-plugin-devel \
-    glibc-static hostname m4 make net-tools openssl openssl-devel perl-devel \
-    perl-generators python3-devel which kernel-rpm-macros \
-    && dnf clean all
+  bpftool bc bison dwarves elfutils-devel flex gcc gcc-c++ gcc-plugin-devel \
+  glibc-static hostname m4 make net-tools openssl openssl-devel perl-devel \
+  perl-generators python3-devel which kernel-rpm-macros kernel-tools \
+  kernel-tools-libs-devel \
+  && dnf clean all
 
 # Setup build directory
 RUN rpmdev-setuptree
