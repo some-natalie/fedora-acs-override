@@ -20,5 +20,9 @@ sed -i 's/# define buildid .local/%define buildid .acs/g' ~/rpmbuild/SPECS/kerne
 sed -i '/^Patch1:*/a Patch1000: add-acs-override.patch' ~/rpmbuild/SPECS/kernel.spec
 sed -i '/^ApplyOptionalPatch patch-*/a ApplyOptionalPatch add-acs-override.patch' ~/rpmbuild/SPECS/kernel.spec
 
+# Edit the target config files to remove BTF configuration
+sed -i 's/CONFIG_DEBUG_INFO_BTF=y/CONFIG_DEBUG_INFO_BTF=n/g' ~/rpmbuild/SOURCES/kernel-x86_64-*.config
+sed -i 's/CONFIG_DEBUG_INFO_BTF_MODULES=y/CONFIG_DEBUG_INFO_BTF_MODULES=n/g' ~/rpmbuild/SOURCES/kernel-x86_64-*.config
+
 # Build the things!
-cd ~/rpmbuild/SPECS && rpmbuild -bb kernel.spec --without debug --without debuginfo --target x86_64 --nodeps --nocheck
+cd ~/rpmbuild/SPECS && rpmbuild -bb kernel.spec --without debug --without debuginfo --target x86_64 --nodeps
