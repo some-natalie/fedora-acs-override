@@ -19,10 +19,7 @@ curl -o ~/rpmbuild/SOURCES/add-acs-override.patch https://raw.githubusercontent.
 sed -i 's/# define buildid .local/%define buildid .acs/g' ~/rpmbuild/SPECS/kernel.spec
 sed -i '/^Patch1:*/a Patch1000: add-acs-override.patch' ~/rpmbuild/SPECS/kernel.spec
 sed -i '/^ApplyOptionalPatch patch-*/a ApplyOptionalPatch add-acs-override.patch' ~/rpmbuild/SPECS/kernel.spec
-
-# Edit the target config files to remove BTF configuration
-sed -i 's/CONFIG_DEBUG_INFO_BTF=y/# CONFIG_DEBUG_INFO_BTF is not set/g' ~/rpmbuild/SOURCES/kernel-x86_64-*.config
-sed -i 's/CONFIG_DEBUG_INFO_BTF_MODULES=y/# CONFIG_DEBUG_INFO_BTF_MODULES is not set/g' ~/rpmbuild/SOURCES/kernel-x86_64-*.config
+sed -i 's|cp ./bpf/tools/sbin/bpftool %{buildroot}%{_libexecdir}/kselftests/bpf/bpftool|cp /usr/bin/bpftool %{buildroot}%{_libexecdir}/kselftests/bpf/bpftool|' filename
 
 # Build the things!
 cd ~/rpmbuild/SPECS && rpmbuild -bb kernel.spec --without debug --without debuginfo --target x86_64 --nodeps
