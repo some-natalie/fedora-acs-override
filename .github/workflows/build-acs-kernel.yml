@@ -23,7 +23,7 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
-          persist-credentials: false 
+          persist-credentials: false
 
       - name: Free up disk space
         run: |
@@ -47,11 +47,11 @@ jobs:
             /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
             !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*debug*.rpm
 
-  build-fc41:
+  build-fc43:
     permissions:
       actions: write # to allow the workflow to upload artifacts
     runs-on: ubuntu-latest
-    name: Build Fedora 41 kernel with ACS override patch
+    name: Build Fedora 43 kernel with ACS override patch
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
@@ -61,7 +61,7 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
-          persist-credentials: false 
+          persist-credentials: false
 
       - name: Free up disk space
         run: |
@@ -73,14 +73,14 @@ jobs:
           sudo rm -rf /usr/local
           df -h
 
-      - name: Build the Fedora 41 RPMs
+      - name: Build the Fedora 43 RPMs
         id: build-rpms
-        uses: ./fc41-action
+        uses: ./fc43-action
 
       - name: Upload the RPMs as artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc41-acs-override-rpms
+          name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc43-acs-override-rpms
           path: |
             /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
             !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*debug*.rpm
