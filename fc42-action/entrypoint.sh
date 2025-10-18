@@ -19,7 +19,7 @@ curl -o ~/rpmbuild/SOURCES/add-acs-override.patch https://raw.githubusercontent.
 sed -i 's/# define buildid .local/%define buildid .acs/g' ~/rpmbuild/SPECS/kernel.spec
 sed -i '/^Patch1:*/a Patch1000: add-acs-override.patch' ~/rpmbuild/SPECS/kernel.spec
 sed -i '/^ApplyOptionalPatch patch-*/a ApplyOptionalPatch add-acs-override.patch' ~/rpmbuild/SPECS/kernel.spec
-sed -i 's|cp ./bpf/tools/sbin/bpftool %{buildroot}%{_libexecdir}/kselftests/bpf/bpftool|cp /usr/bin/bpftool %{buildroot}%{_libexecdir}/kselftests/bpf/bpftool|' filename
+sed -i 's|cp ./bpf/tools/sbin/bpftool %{buildroot}%{_libexecdir}/kselftests/bpf/bpftool|cp /usr/bin/bpftool %{buildroot}%{_libexecdir}/kselftests/bpf/bpftool|' ~/rpmbuild/SPECS/kernel.spec
 
 # Build the things!
 cd ~/rpmbuild/SPECS && rpmbuild -bb kernel.spec --without debug --without debuginfo --target x86_64 --nodeps
