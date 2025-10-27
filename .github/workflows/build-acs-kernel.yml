@@ -40,7 +40,7 @@ jobs:
         uses: ./fc42-action
 
       - name: Upload the RPMs as artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc42-acs-override-rpms
           path: |
@@ -78,7 +78,7 @@ jobs:
         uses: ./fc43-action
 
       - name: Upload the RPMs as artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc43-acs-override-rpms
           path: |
