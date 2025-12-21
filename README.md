@@ -1,11 +1,11 @@
-# Fedora 42 + PCI passthrough
+# Fedora 43 + PCI passthrough
 
 > [!NOTE]
 > [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/some-natalie/fedora-acs-override/badge)](https://securityscorecards.dev/viewer/?uri=github.com/some-natalie/fedora-acs-override) (more about this metric and what it means at [securityscorecards.dev](https://securityscorecards.dev/)) - track progress on anything surfaced by it [here](https://github.com/some-natalie/fedora-acs-override/issues)
 
 ## Prerequisites
 
-- Fedora 42 (fresh install off the live USB image)
+- Fedora 43 (fresh install off the live USB image)
 - Computer with
   - Two graphics cards
   - Motherboard with the Intel 200 series chipset (Union Point) or newer
@@ -108,7 +108,7 @@
 
     ```shell
     sudo su -
-    dnf install xorg-x11-drv-nvidia akmod-nvidia "kernel-devel-uname-r == $(uname -r)" xorg-x11-drv-nvidia-cuda vulkan vdpauinfo libva-vdpau-driver libva-utils
+    dnf install xorg-x11-drv-nvidia akmod-nvidia kernel-devel xorg-x11-drv-nvidia-cuda vulkan vdpauinfo libva-utils
     dnf remove *nouveau*
     echo "blacklist nouveau" >> /etc/modprobe.d/blacklist.conf
     ```
@@ -137,13 +137,13 @@
     If your video cards are identical, use this instead:
 
     ```shell
-    GRUB_CMDLINE_LINUX="rd.driver.pre=vfio-pci rd.driver.blacklist=nouveau modprobe.blacklist=nouveau nvidia-drm.modeset=1 resume=/dev/mapper/arch-swap rd.lvm.lv=arch/root rd.lvm.lv=arch/swap rhgb quiet intel_iommu=on iommu=pt pcie_acs_override=downstream"
+    GRUB_CMDLINE_LINUX="rd.driver.pre=vfio-pci rd.driver.blacklist=nouveau,nova_core modprobe.blacklist=nouveau,nova_core nvidia-drm.modeset=1 rhgb quiet intel_iommu=on iommu=pt pcie_acs_override=downstream"
     ```
 
 1. Rebuild GRUB's configuration
 
     ```shell
-    sudo grub2-mkconfig -o /boot/efi/EFI/fedora/grub.cfg
+    sudo grub2-mkconfig -o /boot/grub2/grub.cfg
     ```
 
 1. Edit `/etc/modprobe.d/kvm.conf`.  These two lines are edited out due to stability concerns.  YMMV.
