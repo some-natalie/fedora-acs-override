@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: Harden the runner (Audit all outbound calls)
-        uses: step-security/harden-runner@a90bcbc6539c36a85cdfeb73f7e2f433735f215b # v2.15.0
+        uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
         with:
           egress-policy: audit
 
@@ -72,6 +72,6 @@ jobs:
 
       # Upload the results to GitHub's code scanning dashboard.
       - name: "Upload to code-scanning"
-        uses: github/codeql-action/upload-sarif@a6594f96a3c88bcd1537795a61816854dc8ccf20 # v3.29.5
+        uses: github/codeql-action/upload-sarif@ea5f71947c021286c99f61cc426a10d715fe4434 # v3.29.5
         with:
           sarif_file: results.sarif
