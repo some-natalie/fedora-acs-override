@@ -6,7 +6,12 @@ updates:
       interval: "daily"
 
   - package-ecosystem: "docker"
-    directory: "/fc41-action"
+    directory: "/fc44-action"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "docker"
+    directory: "/fc43-action"
     schedule:
       interval: "daily"
 
