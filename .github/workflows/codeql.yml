@@ -36,12 +36,12 @@ jobs:
         persist-credentials: false
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@7c5585e5cf078a7726d40d2fbea3e00a7e109faf # v3.29.5
+      uses: github/codeql-action/init@a723e99345b89ee0bbcbd68ee4e63f9a56b42a25 # v3.29.5
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@7c5585e5cf078a7726d40d2fbea3e00a7e109faf # v3.29.5
+      uses: github/codeql-action/analyze@a723e99345b89ee0bbcbd68ee4e63f9a56b42a25 # v3.29.5
       with:
         category: "/language:${{matrix.language}}"
