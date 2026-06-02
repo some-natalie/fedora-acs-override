@@ -14,8 +14,3 @@ updates:
     directory: "/fc43-action"
     schedule:
       interval: "daily"
-
-  - package-ecosystem: "docker"
-    directory: "/fc42-action"
-    schedule:
-      interval: "daily"
