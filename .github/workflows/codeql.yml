@@ -42,6 +42,6 @@ jobs:
         build-mode: ${{ matrix.build-mode }}
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@9cea5827c668a1fe7165dbce6e80c3f9cf3f83ac # v3.29.5
+      uses: github/codeql-action/analyze@628fc3f124e68b0151f0d2a5d81e864ee1e42335 # v3.29.5
       with:
         category: "/language:${{matrix.language}}"
