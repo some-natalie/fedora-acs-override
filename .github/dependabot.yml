@@ -3,14 +3,11 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
 
   - package-ecosystem: "docker"
-    directory: "/fc44-action"
+    directories:
+      - "/fc43-action"
+      - "/fc44-action"
     schedule:
-      interval: "daily"
-
-  - package-ecosystem: "docker"
-    directory: "/fc43-action"
-    schedule:
-      interval: "daily"
+      interval: "weekly"
