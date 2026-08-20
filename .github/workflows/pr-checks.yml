@@ -50,9 +50,6 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Build the FC42 kernel RPMs
-        uses: ./fc42-action
-        id: build-fc42-rpms
       - name: Build the FC43 kernel RPMs
         uses: ./fc43-action
         id: build-fc43-rpms
