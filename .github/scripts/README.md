@@ -1,4 +1,4 @@
-scripts for the github actions build jobs go here
+# scripts for the github actions build jobs go here
 
 All of them run from the repo root and read their inputs from the environment, so they're callable straight from a `run:` step. They set their own `set -euo pipefail`, so the workflow doesn't need to, and they're invoked directly rather than piped to a shell, so they need their executable bit.
 
