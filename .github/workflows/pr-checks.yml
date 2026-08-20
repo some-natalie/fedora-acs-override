@@ -35,6 +35,7 @@ jobs:
           VALIDATE_MARKDOWN: true
           MARKDOWN_CONFIG_FILE: .markdownlint.json
           VALIDATE_BASH: true
+          VALIDATE_BASH_EXEC: true # the workflows call .github/scripts directly
 
   build-dependabot-PRs:
     name: Build the kernel RPMs, if the PR is from Dependabot

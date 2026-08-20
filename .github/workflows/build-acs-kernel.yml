@@ -26,14 +26,7 @@ jobs:
           persist-credentials: false
 
       - name: Free up disk space
-        run: |
-          sudo apt-get -qq purge build-essential "ghc*"
-          sudo apt-get clean
-          # cleanup docker images not used by us
-          docker system prune -af
-          # free up a lot of stuff from /usr/local
-          sudo rm -rf /usr/local
-          df -h
+        run: .github/scripts/free-disk-space.sh
 
       - name: Build the Fedora 43 RPMs
         id: build-rpms
@@ -64,14 +57,7 @@ jobs:
           persist-credentials: false
 
       - name: Free up disk space
-        run: |
-          sudo apt-get -qq purge build-essential "ghc*"
-          sudo apt-get clean
-          # cleanup docker images not used by us
-          docker system prune -af
-          # free up a lot of stuff from /usr/local
-          sudo rm -rf /usr/local
-          df -h
+        run: .github/scripts/free-disk-space.sh
 
       - name: Build the Fedora 44 RPMs
         id: build-rpms

@@ -21,6 +21,7 @@ jobs:
     permissions:
       contents: read
     outputs:
+      changed: ${{ steps.action-info.outputs.changed }}
       old_action_org: ${{ steps.action-info.outputs.old_action_org }}
       new_action_org: ${{ steps.action-info.outputs.new_action_org }}
       old_action_repo: ${{ steps.action-info.outputs.old_action_repo }}
@@ -35,97 +36,28 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Get PR diff
-        shell: bash
-        run: |
-          gh pr diff ${{ github.event.pull_request.number }} > pr.diff
+      - name: Parse the Action repo and refs out of the PR diff
+        id: action-info
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract old and new Action lines
-        shell: bash
-        run: |
-          OLD_LINE=$(grep '^-' pr.diff | grep 'uses:' | tail -1)
-          NEW_LINE=$(grep '^+' pr.diff | grep 'uses:' | tail -1)
-          echo "OLD_ACTION_LINE=$OLD_LINE" >> "$GITHUB_ENV"
-          echo "NEW_ACTION_LINE=$NEW_LINE" >> "$GITHUB_ENV"
-
-      - name: Parse Action repo and refs
-        shell: bash
-        id: action-info
-        run: |
-          # Remove diff markers and whitespace, then extract repo and ref
-          OLD_USE="${OLD_ACTION_LINE#-}"
-          OLD_USE="$(echo "$OLD_USE" | xargs)" # trim whitespace
-          OLD_USE="${OLD_USE#uses:}"
-          # if there's more than one / in the repo, capture the directory structure
-          if [[ $(echo "$OLD_USE" | grep -o '/' | wc -l) -gt 1 ]]; then
-            OLD_ACTION_ORG="${OLD_USE%%/*}" # everything before the first /
-            OLD_ACTION_REPO="${OLD_USE#*/}" # remove the first /
-            OLD_ACTION_REPO="${OLD_ACTION_REPO%%/*}" # everything before the next /
-            OLD_ACTION_DIR="${OLD_USE#*/}" # everything after the first /
-            OLD_ACTION_DIR="${OLD_ACTION_DIR#*/}" # do it again
-            OLD_ACTION_DIR="${OLD_ACTION_DIR%@*}" # remove anything after the @
-          else
-            OLD_ACTION_ORG="${OLD_USE%%/*}"
-            OLD_ACTION_REPO="${OLD_USE#*/}"
-            OLD_ACTION_REPO="${OLD_ACTION_REPO%%/*}"
-            OLD_ACTION_REPO="${OLD_ACTION_REPO%@*}"
-            OLD_ACTION_DIR=""
-          fi
-          OLD_REF="${OLD_USE##*@}"
-          OLD_REF="${OLD_REF%%#*}" # Remove anything after a '#'
-
-          NEW_USE="${NEW_ACTION_LINE#+}"
-          NEW_USE="$(echo "$NEW_USE" | xargs)" # trim whitespace
-          NEW_USE="${NEW_USE#uses:}"
-          # if there's more than one / in the repo, capture the directory structure
-          if [[ $(echo "$NEW_USE" | grep -o '/' | wc -l) -gt 1 ]]; then
-            NEW_ACTION_ORG="${NEW_USE%%/*}" # everything before the first /
-            NEW_ACTION_REPO="${NEW_USE#*/}" # remove the first /
-            NEW_ACTION_REPO="${NEW_ACTION_REPO%%/*}" # everything before the next /
-            NEW_ACTION_DIR="${NEW_USE#*/}" # everything after the first /
-            NEW_ACTION_DIR="${NEW_ACTION_DIR#*/}" # do it again
-            NEW_ACTION_DIR="${NEW_ACTION_DIR%@*}" # remove anything after the @
-          else
-            NEW_ACTION_ORG="${NEW_USE%%/*}"
-            NEW_ACTION_REPO="${NEW_USE#*/}"
-            NEW_ACTION_REPO="${NEW_ACTION_REPO%%/*}"
-            NEW_ACTION_REPO="${NEW_ACTION_REPO%@*}"
-            NEW_ACTION_DIR=""
-          fi
-          NEW_REF="${NEW_USE##*@}"
-          NEW_REF="${NEW_REF%%#*}" # Remove anything after a '#'
-
-          echo "old_action_org=$OLD_ACTION_ORG" >> "$GITHUB_OUTPUT"
-          echo "new_action_org=$NEW_ACTION_ORG" >> "$GITHUB_OUTPUT"
-          echo "old_action_repo=$OLD_ACTION_REPO" >> "$GITHUB_OUTPUT"
-          echo "new_action_repo=$NEW_ACTION_REPO" >> "$GITHUB_OUTPUT"
-          echo "old_action_dir=$OLD_ACTION_DIR" >> "$GITHUB_OUTPUT"
-          echo "new_action_dir=$NEW_ACTION_DIR" >> "$GITHUB_OUTPUT"
-          echo "old_ref=$OLD_REF" >> "$GITHUB_OUTPUT"
-          echo "new_ref=$NEW_REF" >> "$GITHUB_OUTPUT"
-
-      - name: Show extracted variables
-        shell: bash
-        run: |
-          echo "Old Action org: ${{ steps.action-info.outputs.old_action_org }}"
-          echo "Old Action repo: ${{ steps.action-info.outputs.old_action_repo }}"
-          echo "Old Action dir: ${{ steps.action-info.outputs.old_action_dir }}"
-          echo "Old ref: ${{ steps.action-info.outputs.old_ref }}"
-          echo "New Action org: ${{ steps.action-info.outputs.new_action_org }}"
-          echo "New Action repo: ${{ steps.action-info.outputs.new_action_repo }}"
-          echo "New Action dir: ${{ steps.action-info.outputs.new_action_dir }}"
-          echo "New ref: ${{ steps.action-info.outputs.new_ref }}"
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: .github/scripts/parse-action-diff.sh
 
   malcontent:
     name: Malware analysis using malcontent
     needs: extract-action-repo
+    if: needs.extract-action-repo.outputs.changed == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+      packages: write # to push the built Action images for malcontent to diff
     steps:
+      # first, so the later path-scoped checkouts survive this one's clean
+      - name: Checkout this repo for its scripts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
       # look at prior state
       - name: Checkout original code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -136,38 +68,12 @@ jobs:
           persist-credentials: false
 
       - name: Setup original code
-        shell: bash
-        working-directory: ${{ github.workspace }}/prior-commit
-        run: |
-          # change to the Action directory if specified
-          if [[ -n "${{ needs.extract-action-repo.outputs.old_action_dir }}" ]]; then
-            echo "changing directory to ${{ needs.extract-action-repo.outputs.new_action_dir }}"
-            cd "${{ needs.extract-action-repo.outputs.old_action_dir }}" || true
-          fi
-          # rename action.yml to action.yaml if it exists
-          if [[ -f action.yaml ]]; then
-            mv action.yaml action.yml
-          fi
-          # figure out type of Action
-          type=$(yq '.runs.using' action.yml)
-          echo "OLD_ACTION_TYPE=$type" >> $GITHUB_ENV
-          if [[ $type == docker ]]; then
-            image=$(yq '.runs.image' action.yml)
-            if [[ $image == "Dockerfile" ]]; then
-              echo "This Action uses a Dockerfile, building it..."
-              docker build -t ghcr.io/${{ github.repo }}/prior-action-image:latest .
-              docker push ghcr.io/${{ github.repo }}/prior-action-image:latest
-              echo "OLD_ACTION_IMAGE=ghcr.io/${{ github.repo }}/prior-action-image:latest" >> $GITHUB_ENV
-            else
-              echo "This Action uses a pre-built Docker image: $image"
-              echo "OLD_ACTION_IMAGE=$(echo $image | cut -d'/' -f3-)" >> $GITHUB_ENV
-            fi
-          elif [[ $type == node* ]]; then
-            echo "This Action uses Node.js, installing dependencies..."
-            npm install
-          elif [[ $type == composite* ]]; then
-            echo "The original Action is a composite Action, skipping build." >> $GITHUB_STEP_SUMMARY
-          fi
+        env:
+          SIDE: OLD
+          REPO: ${{ github.repository }}
+          CHECKOUT: prior-commit
+          ACTION_DIR: ${{ needs.extract-action-repo.outputs.old_action_dir }}
+        run: .github/scripts/setup-action-code.sh
 
       # look at current commit
       - name: Checkout the current code
@@ -179,60 +85,15 @@ jobs:
           persist-credentials: false
 
       - name: Setup new code
-        shell: bash
-        id: setup-new-action
-        working-directory: ${{ github.workspace }}/current-commit
-        run: |
-          # change to the Action directory if specified
-          if [[ -n "${{ needs.extract-action-repo.outputs.new_action_dir }}" ]]; then
-            echo "changing directory to ${{ needs.extract-action-repo.outputs.new_action_dir }}"
-            cd "${{ needs.extract-action-repo.outputs.new_action_dir }}" || true
-          fi
-          # rename action.yml to action.yaml if it exists
-          if [[ -f action.yaml ]]; then
-            mv action.yaml action.yml
-          fi
-          # figure out type of Action
-          type=$(yq '.runs.using' action.yml)
-          echo "NEW_ACTION_TYPE=$type" >> $GITHUB_ENV
-          if [[ $type == docker ]]; then
-            image=$(yq '.runs.image' action.yml)
-            if [[ $image == "Dockerfile" ]]; then
-              echo "This Action uses a Dockerfile, building it..."
-              docker build -t ghcr.io/${{ github.repo }}/prior-action-image:latest .
-              docker push ghcr.io/${{ github.repo }}/new-action-image:latest
-              echo "NEW_ACTION_IMAGE=ghcr.io/${{ github.repo }}/new-action-image:latest" >> $GITHUB_ENV
-            else
-              echo "This Action uses a pre-built Docker image: $image"
-              echo "NEW_ACTION_IMAGE=$(echo $image | cut -d'/' -f3-)" >> $GITHUB_ENV
-            fi
-          elif [[ $type == node* ]]; then
-            echo "This Action uses Node.js, installing dependencies..."
-            npm install
-          elif [[ $type == composite* ]]; then
-            echo "The proposed new Action is a composite Action, skipping build." >> $GITHUB_STEP_SUMMARY
-          fi
+        env:
+          SIDE: NEW
+          REPO: ${{ github.repository }}
+          CHECKOUT: current-commit
+          ACTION_DIR: ${{ needs.extract-action-repo.outputs.new_action_dir }}
+        run: .github/scripts/setup-action-code.sh
 
       - name: Analyze the files
-        id: malcontent
-        shell: bash
-        run: |
-          if [[ "${{ env.OLD_ACTION_TYPE }}" == "docker" && "${{ env.NEW_ACTION_TYPE }}" == "docker" ]]; then
-            echo "Original image ${{ env.OLD_ACTION_IMAGE }}"
-            echo "Proposed new image ${{ env.NEW_ACTION_IMAGE }}"
-            docker run --rm --privileged -v /var/run/docker.sock:/var/run/docker.sock --user 0 -v ${{ github.workspace }}:/tmp cgr.dev/chainguard/malcontent:latest --format=markdown diff -i ${{ env.OLD_ACTION_IMAGE}} ${{ env.NEW_ACTION_IMAGE }} >> malcontent-results.md
-          else
-            docker run --rm --user 0 -v ${{ github.workspace }}:/tmp cgr.dev/chainguard/malcontent:latest --format=markdown --min-file-risk=high diff /tmp/prior-commit /tmp/current-commit >> malcontent-results.md
-          fi
-
-      - name: Add comment if results are empty
-        shell: bash
-        run: |
-          if [ ! -s "malcontent-results.md" ]; then
-            echo "## malcontent detects no changes" >> "malcontent-results.md"
-            echo "" >> "malcontent-results.md"
-            echo "you may want to investigate manually" >> "malcontent-results.md"
-          fi
+        run: .github/scripts/malcontent-diff.sh
 
       - name: Upload results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -248,6 +109,11 @@ jobs:
       contents: read
       pull-requests: write
     steps:
+      - name: Checkout this repo for its scripts
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
       - name: Download results
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -255,22 +121,8 @@ jobs:
           path: .
 
       - name: Comment on the PR
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            const fs = require('fs');
-            const filePath = 'malcontent-results.md';
-
-            if (!fs.existsSync(filePath)) {
-              throw new Error(`File not found: ${filePath}`);
-            }
-
-            const fileContent = fs.readFileSync(filePath, 'utf8');
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: fileContent,
-            });
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: .github/scripts/comment-malcontent-results.sh
