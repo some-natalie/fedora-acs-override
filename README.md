@@ -1,7 +1,7 @@
 # Fedora 44 + PCI passthrough
 
 > [!NOTE]
-> [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/some-natalie/fedora-acs-override/badge)](https://securityscorecards.dev/viewer/?uri=github.com/some-natalie/fedora-acs-override) (more about this metric and what it means at [securityscorecards.dev](https://securityscorecards.dev/)) - track progress on anything surfaced by it [here](https://github.com/some-natalie/fedora-acs-override/issues)
+> [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/some-natalie/fedora-acs-override/badge)](https://securityscorecards.dev/viewer/?uri=github.com/some-natalie/fedora-acs-override) (more about this metric and what it means at [securityscorecards.dev](https://securityscorecards.dev/)) - track progress on anything surfaced by it in [this repo's issues](https://github.com/some-natalie/fedora-acs-override/issues)
 
 ## Prerequisites
 
@@ -11,12 +11,17 @@
   - Motherboard with the Intel 200 series chipset (Union Point) or newer
 - A fresh backup of anything you don't care to lose
 
-:new:  Just want the RPMs?  Go to the [latest workflow run](https://github.com/some-natalie/fedora-acs-override/actions/workflows/build-acs-kernel.yml) and download the RPMs as a build artifact, as shown below:
+:new:  Just want the RPMs?  There's a dnf repo, so you can skip every (ACS only) step below and install the patched kernel directly.  It's rebuilt daily against the newest Fedora kernel, so `dnf update` keeps you current.
 
-![download-rpms](pics/download-rpms.png)
+```shell
+sudo dnf config-manager addrepo --from-repofile=https://some-natalie.github.io/fedora-acs-override/acs-override.repo
+sudo dnf install kernel kernel-core kernel-devel kernel-modules kernel-modules-extra
+```
+
+The packages and the repo metadata are both signed, so dnf asks you to accept the signing key the first time.  Check it before you accept it — `gpg --show-keys` on what the site serves should print `FC3F2A6C5D05CE26434442BBD9500E334C48DD8B`, matching [`pages/RPM-GPG-KEY-acs-override`](pages/RPM-GPG-KEY-acs-override) here in the repo.  Every build is attested too, so `gh attestation verify <rpm> --repo some-natalie/fedora-acs-override` will tell you which workflow run produced it.
 
 > [!TIP]
-> The two graphics cards can be different models.  If your cards are identical, you'll need to do some extra steps that are prefaced with (ACS only).  These steps include compiling your own kernel to include Alex Williamson's patch to allow any PCIe device to use Access Control Services.  More information on this patch, why it's necessary, and what it does available [here](https://lkml.org/lkml/2013/5/30/513).  If your cards aren't identical, skip these steps.
+> The two graphics cards can be different models.  If your cards are identical, you'll need to do some extra steps that are prefaced with (ACS only).  These steps include compiling your own kernel to include Alex Williamson's patch to allow any PCIe device to use Access Control Services.  More information on this patch, why it's necessary, and what it does is available on [the LKML thread that proposed it](https://lkml.org/lkml/2013/5/30/513).  If your cards aren't identical, skip these steps.
 
 ## Setup and configuration of the host machine
 
@@ -47,7 +52,7 @@
     sudo dnf builddep kernel.spec
     ```
 
-1. (ACS only) - Add the ACS patch ([link](acs/add-acs-override.patch)) as `~/rpmbuild/SOURCES/add-acs-override.patch`.
+1. (ACS only) - Add [the ACS patch from this repo](acs/add-acs-override.patch) as `~/rpmbuild/SOURCES/add-acs-override.patch`.
 
     ```shell
     curl -o ~/rpmbuild/SOURCES/add-acs-override.patch https://raw.githubusercontent.com/some-natalie/fedora-acs-override/main/acs/add-acs-override.patch    
@@ -209,8 +214,8 @@
 
 ## Resources
 
-- Alex Williamson's blog on the VFIO tips and tricks - [link](https://vfio.blogspot.com/)
-- Arch Linux wiki post on PCI passthrough -  [link](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF)
+- [Alex Williamson's blog on VFIO tips and tricks](https://vfio.blogspot.com/)
+- [Arch Linux wiki post on PCI passthrough](https://wiki.archlinux.org/index.php/PCI_passthrough_via_OVMF)
 
 ## Disclaimer
 

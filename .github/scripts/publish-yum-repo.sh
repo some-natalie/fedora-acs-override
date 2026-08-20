@@ -10,7 +10,16 @@ printf '%%_gpg_name %s\n' "$KEYID" >~/.rpmmacros
 
 mkdir -p site
 cp -r pages/. site/
-gpg --armor --export "$KEYID" >site/RPM-GPG-KEY-acs-override
+
+# the committed key is the trust anchor consumers import, so signing with anything
+# else would break every gpgcheck out there - fail before publishing, not after
+committed=$(gpg --show-keys --with-colons site/RPM-GPG-KEY-acs-override |
+  awk -F: '/^fpr/{print $10; exit}')
+if [ "$committed" != "$KEYID" ]; then
+  echo "::error::pages/RPM-GPG-KEY-acs-override is ${committed}, but signing with ${KEYID}"
+  exit 1
+fi
+
 # rpm --checksig reads rpm's own keyring, not gpg's
 sudo rpm --import site/RPM-GPG-KEY-acs-override
 

@@ -17,6 +17,8 @@ All of them run from the repo root and read their inputs from the environment, s
 
 `publish-yum-repo.sh` signs the RPMs before uploading them to the release, because the repo metadata carries checksums of the exact bytes that get served. It also re-downloads and re-indexes any Fedora release that didn't rebuild this run, since a Pages deploy replaces the whole site.
 
+The public key is committed at `pages/RPM-GPG-KEY-acs-override` rather than exported from the keyring at publish time, so changing the trust anchor consumers import takes a reviewed commit instead of a deploy. `publish-yum-repo.sh` checks that committed key's fingerprint against the key it's actually signing with and fails the run on a mismatch, since publishing the two out of sync would break `gpgcheck` for everyone who already imported it.
+
 `setup-action-code.sh` handles both sides of the malcontent comparison, picking its image name and summary wording off `SIDE`, because the two were otherwise identical.
 
 Values reach these scripts through `env:` rather than `${{ }}` interpolated into the script body, which keeps a crafted branch or tag name from being expanded as shell.
