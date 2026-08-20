@@ -4,11 +4,18 @@ All of them run from the repo root and read their inputs from the environment, s
 
 | script | called by | environment it needs |
 | --- | --- | --- |
+| `check-kernel-version.sh` | `build-acs-kernel.yml`, `check` job | `GH_TOKEN`, `GITHUB_OUTPUT`, optional `FORCE=true` |
 | `free-disk-space.sh` | `build-acs-kernel.yml`, both build jobs | nothing |
+| `import-signing-key.sh` | `build-acs-kernel.yml`, `publish` job | `SIGNING_KEY`, `GITHUB_ENV` |
+| `publish-yum-repo.sh` | `build-acs-kernel.yml`, `publish` job | `GH_TOKEN`, `REPO`, `KEYID`, `V43`, `V44` |
 | `parse-action-diff.sh` | `malcontent-actions.yml`, `extract-action-repo` | `GH_TOKEN`, `PR_NUMBER`, `GITHUB_OUTPUT` |
 | `setup-action-code.sh` | `malcontent-actions.yml`, `malcontent`, once per side | `SIDE` (`OLD`/`NEW`), `REPO`, `CHECKOUT`, `ACTION_DIR`, `GITHUB_ENV`, `GITHUB_STEP_SUMMARY` |
 | `malcontent-diff.sh` | `malcontent-actions.yml`, `malcontent` | `GITHUB_WORKSPACE`, `OLD_ACTION_TYPE`, `NEW_ACTION_TYPE`, and the `*_ACTION_IMAGE` pair for Docker Actions |
 | `comment-malcontent-results.sh` | `malcontent-actions.yml`, `comment` | `GH_TOKEN`, `REPO`, `PR_NUMBER` |
+
+`check-kernel-version.sh` reads the Fedora image digest out of each `fc*-action/Dockerfile` rather than pinning it again, so Dependabot's Dockerfile updates stay the single source of truth.
+
+`publish-yum-repo.sh` signs the RPMs before uploading them to the release, because the repo metadata carries checksums of the exact bytes that get served. It also re-downloads and re-indexes any Fedora release that didn't rebuild this run, since a Pages deploy replaces the whole site.
 
 `setup-action-code.sh` handles both sides of the malcontent comparison, picking its image name and summary wording off `SIDE`, because the two were otherwise identical.
 

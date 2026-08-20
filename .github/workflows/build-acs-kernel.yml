@@ -2,15 +2,51 @@ name: Build RPMs
 
 on:
   workflow_dispatch:
+    inputs:
+      force:
+        description: "Build even if the kernel version hasn't changed"
+        type: boolean
+        default: false
   schedule:
-    - cron: "25 5 * * 0" # 5:25 am UTC on Sundays
+    - cron: "25 5 * * *" # 5:25 am UTC, daily
 
 permissions:
   contents: read
 
 jobs:
-  build-fc43:
+  check:
     permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    name: Check for a new kernel
+    outputs:
+      fc43-build: ${{ steps.check.outputs.fc43-build }}
+      fc43-version: ${{ steps.check.outputs.fc43-version }}
+      fc44-build: ${{ steps.check.outputs.fc44-build }}
+      fc44-version: ${{ steps.check.outputs.fc44-version }}
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout this repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Compare upstream kernel against what's published
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FORCE: ${{ inputs.force }}
+        run: .github/scripts/check-kernel-version.sh
+
+  build-fc43:
+    needs: check
+    if: needs.check.outputs.fc43-build == 'true'
+    permissions:
+      contents: read
       actions: write # to allow the workflow to upload artifacts
     runs-on: ubuntu-latest
     name: Build Fedora 43 kernel with ACS override patch
@@ -29,19 +65,24 @@ jobs:
         run: .github/scripts/free-disk-space.sh
 
       - name: Build the Fedora 43 RPMs
-        id: build-rpms
         uses: ./fc43-action
 
-      - name: Upload the RPMs as artifacts
+      - name: Hand the RPMs to the publish job
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc43-acs-override-rpms
+          name: rpms-fc43
+          retention-days: 1 # the release is the durable copy
           path: |
             /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
             !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*debug*.rpm
+            !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*selftests*.rpm
+            !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*doc*.rpm
 
   build-fc44:
+    needs: check
+    if: needs.check.outputs.fc44-build == 'true'
     permissions:
+      contents: read
       actions: write # to allow the workflow to upload artifacts
     runs-on: ubuntu-latest
     name: Build Fedora 44 kernel with ACS override patch
@@ -60,13 +101,85 @@ jobs:
         run: .github/scripts/free-disk-space.sh
 
       - name: Build the Fedora 44 RPMs
-        id: build-rpms
         uses: ./fc44-action
 
-      - name: Upload the RPMs as artifacts
+      - name: Hand the RPMs to the publish job
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: kernel-${{ steps.build-rpms.outputs.kernel-version }}-fc44-acs-override-rpms
+          name: rpms-fc44
+          retention-days: 1 # the release is the durable copy
           path: |
             /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
             !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*debug*.rpm
+            !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*selftests*.rpm
+            !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*doc*.rpm
+
+  publish:
+    needs: [check, build-fc43, build-fc44]
+    if: ${{ !cancelled() && (needs.build-fc43.result == 'success' || needs.build-fc44.result == 'success') }}
+    permissions:
+      contents: write # to create releases and upload RPMs
+      pages: write # to deploy the yum repo
+      id-token: write # for deploy-pages and attestations
+      attestations: write
+    runs-on: ubuntu-latest
+    name: Sign, release, and deploy the yum repo
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout this repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Collect the freshly built RPMs
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: fresh
+          pattern: rpms-fc*
+
+      - name: Install the signing and indexing tools
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq rpm createrepo-c
+
+      - name: Import the signing key
+        env:
+          SIGNING_KEY: ${{ secrets.RPM_SIGNING_KEY }}
+        run: .github/scripts/import-signing-key.sh
+
+      - name: Sign the RPMs, publish them, and build the repo metadata
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          V43: ${{ needs.check.outputs.fc43-version }}
+          V44: ${{ needs.check.outputs.fc44-version }}
+        run: .github/scripts/publish-yum-repo.sh
+
+      - name: Attest the Fedora 43 RPMs
+        if: needs.build-fc43.result == 'success'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: site/fc43/*.rpm
+
+      - name: Attest the Fedora 44 RPMs
+        if: needs.build-fc44.result == 'success'
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: site/fc44/*.rpm
+
+      - name: Drop the RPMs from the site, Pages only carries metadata
+        run: find site -name '*.rpm' -delete
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site
+
+      - name: Deploy the yum repo
+        id: deploy
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
