@@ -53,6 +53,9 @@ jobs:
       - name: Build the FC43 kernel RPMs
         uses: ./fc43-action
         id: build-fc43-rpms
+      - name: Build the FC44 kernel RPMs
+        uses: ./fc44-action
+        id: build-fc44-rpms
 
   # merge-dependabot-PRs:
   #     name: Automatically merge Dependabot PRs
