@@ -18,7 +18,7 @@ sudo dnf config-manager addrepo --from-repofile=https://some-natalie.github.io/f
 sudo dnf install kernel kernel-core kernel-devel kernel-modules kernel-modules-extra
 ```
 
-The five most recent kernel versions stay in the repo, so if a new one breaks your passthrough you can `dnf downgrade kernel-core` or just boot the previous entry.  `dnf list --showduplicates kernel-core` shows what's available.
+The five most recent kernel versions stay in the repo, so if a new one breaks your passthrough you can `dnf downgrade kernel-core` or just boot the previous entry.  `dnf list --showduplicates kernel-core` shows what's available.  Those five stick around after a Fedora release goes EOL and stops being built, so upgrading Fedora is your call to make rather than something a build schedule forces.
 
 The packages and the repo metadata are both signed, so dnf asks you to accept the signing key the first time.  Check it before you accept it — `gpg --show-keys` on what the site serves should print `FC3F2A6C5D05CE26434442BBD9500E334C48DD8B`, matching [`pages/RPM-GPG-KEY-acs-override`](pages/RPM-GPG-KEY-acs-override) here in the repo.  Every build is attested too, so `gh attestation verify <rpm> --repo some-natalie/fedora-acs-override` will tell you which workflow run produced it.
 

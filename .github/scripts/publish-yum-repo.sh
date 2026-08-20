@@ -34,7 +34,21 @@ version_of() {
   echo "${n#"${n%-*-*}-"}"
 }
 
-for fc in 43 44; do
+# Publish every Fedora version that has a release, not just the ones still being
+# built. A version that's gone EOL and dropped out of the build list keeps its
+# repodata this way, so its last few kernels stay installable - otherwise the
+# whole-site deploy drops its directory and dnf 404s on the repo it still has
+# configured. Union with what built this run, since the first build of a new
+# Fedora version has no release yet.
+fcs=$({
+  gh release list --repo "$REPO" --limit 100 --json tagName \
+    --jq '.[].tagName | select(test("^fc[0-9]+-latest$"))' |
+    sed -E 's/^fc([0-9]+)-latest$/\1/'
+  find fresh -maxdepth 1 -name 'rpms-fc*' -exec basename {} \; 2>/dev/null |
+    sed -E 's/^rpms-fc([0-9]+)$/\1/'
+} | sort -un)
+
+for fc in $fcs; do
   tag="fc${fc}-latest"
   dest="site/fc${fc}"
   mkdir -p "$dest"
