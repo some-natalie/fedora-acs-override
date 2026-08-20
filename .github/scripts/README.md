@@ -15,7 +15,9 @@ All of them run from the repo root and read their inputs from the environment, s
 
 `check-kernel-version.sh` reads the Fedora image digest out of each `fc*-action/Dockerfile` rather than pinning it again, so Dependabot's Dockerfile updates stay the single source of truth.
 
-`publish-yum-repo.sh` signs the RPMs before uploading them to the release, because the repo metadata carries checksums of the exact bytes that get served. It also re-downloads and re-indexes any Fedora release that didn't rebuild this run, since a Pages deploy replaces the whole site.
+`publish-yum-repo.sh` signs the RPMs before uploading them to the release, because the repo metadata carries checksums of the exact bytes that get served.
+
+It indexes whatever the release holds rather than only what built this run, and prunes the release to the newest `KEEP` versions. Both halves matter: a Pages deploy replaces the whole site, so a release that didn't rebuild still has to be re-indexed or it vanishes from the repo, and indexing only the fresh build would drop older kernels from the repo the day they're superseded only for them to reappear the next time that release sat a run out. Keeping several versions is deliberate, since a kernel that breaks passthrough wants backing out with `dnf downgrade`. The cost is re-downloading the kept RPMs on each publish, which retention bounds.
 
 The public key is committed at `pages/RPM-GPG-KEY-acs-override` rather than exported from the keyring at publish time, so changing the trust anchor consumers import takes a reviewed commit instead of a deploy. `publish-yum-repo.sh` checks that committed key's fingerprint against the key it's actually signing with and fails the run on a mismatch, since publishing the two out of sync would break `gpgcheck` for everyone who already imported it.
 
