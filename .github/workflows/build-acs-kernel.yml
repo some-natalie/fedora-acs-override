@@ -161,19 +161,16 @@ jobs:
         run: .github/scripts/publish-yum-repo.sh
 
       - name: Attest the Fedora 43 RPMs
-        if: needs.build-fc43.result == 'success'
+        if: env.PUBLISHED_FC43 != ''
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          subject-path: site/fc43/*.rpm
+          subject-path: ${{ env.PUBLISHED_FC43 }}/*.rpm
 
       - name: Attest the Fedora 44 RPMs
-        if: needs.build-fc44.result == 'success'
+        if: env.PUBLISHED_FC44 != ''
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          subject-path: site/fc44/*.rpm
-
-      - name: Drop the RPMs from the site, Pages only carries metadata
-        run: find site -name '*.rpm' -delete
+          subject-path: ${{ env.PUBLISHED_FC44 }}/*.rpm
 
       - name: Upload the site
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
