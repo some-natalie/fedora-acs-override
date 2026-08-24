@@ -29,9 +29,14 @@ sed -i '/^Patch1:*/a Patch1000: add-acs-override.patch' ~/rpmbuild/SPECS/kernel.
 sed -i '/^ApplyOptionalPatch patch-*/a ApplyOptionalPatch add-acs-override.patch' ~/rpmbuild/SPECS/kernel.spec
 sed -i 's|cp ./bpf/tools/sbin/bpftool %{buildroot}%{_libexecdir}/kselftests/bpf/bpftool|cp /usr/bin/bpftool %{buildroot}%{_libexecdir}/kselftests/bpf/bpftool|' ~/rpmbuild/SPECS/kernel.spec
 
+# %prep checks each patch is declared by grepping ${RPM_PACKAGE_NAME}.spec, so
+# the file has to follow the package rename or it rejects the ACS patch as
+# undeclared. It hides the missing-file error, so the message blames the patch.
+mv ~/rpmbuild/SPECS/kernel.spec ~/rpmbuild/SPECS/kernel-acs.spec
+
 # Build the things!
 # perf, libperf and tools are dropped because they're named absolutely
 # (%package -n perf) rather than off %{name}, so the rename misses them and they
 # would collide with Fedora's. rtla and rv are inside the tools conditional.
-cd ~/rpmbuild/SPECS && rpmbuild -bb kernel.spec --without debug --without debuginfo \
+cd ~/rpmbuild/SPECS && rpmbuild -bb kernel-acs.spec --without debug --without debuginfo \
   --without perf --without libperf --without tools --target x86_64 --nodeps
