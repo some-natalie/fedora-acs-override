@@ -15,10 +15,26 @@
 
 ```shell
 sudo dnf config-manager addrepo --from-repofile=https://some-natalie.github.io/fedora-acs-override/acs-override.repo
-sudo dnf install kernel kernel-core kernel-devel kernel-modules kernel-modules-extra
+sudo dnf install kernel-acs kernel-acs-core kernel-acs-devel kernel-acs-modules kernel-acs-modules-extra
 ```
 
-The five most recent kernel versions stay in the repo, so if a new one breaks your passthrough you can `dnf downgrade kernel-core` or just boot the previous entry.  `dnf list --showduplicates kernel-core` shows what's available.  Those five stick around after a Fedora release goes EOL and stops being built, so upgrading Fedora is your call to make rather than something a build schedule forces.
+These are named `kernel-acs*` rather than `kernel*` on purpose — they're a separate package family from Fedora's own kernel, so installing them never replaces or conflicts with the stock one.  Both stay installed and bootable, `dnf update` tracks each independently, and you pick which one runs at the boot menu or with `grubby --set-default`.  `uname -r` tells you which you're on, since the ACS builds carry `.acs` in the release.
+
+The five most recent kernel versions stay in the repo, so if a new one breaks your passthrough you can boot the previous entry, or make it the default:
+
+```shell
+dnf list --showduplicates kernel-acs-core    # what's available
+sudo grubby --info=ALL | grep -E 'index|title'
+sudo grubby --set-default=/boot/vmlinuz-7.1.9-200.acs.fc44.x86_64
+```
+
+Kernels are `installonly` packages, so `dnf downgrade` refuses to touch them.  To pull an older build back down, install it by exact version — it lands alongside what you already have rather than replacing it:
+
+```shell
+sudo dnf install kernel-acs-core-7.1.8-200.acs.fc44 kernel-acs-modules-7.1.8-200.acs.fc44
+```
+
+Those five stick around after a Fedora release goes EOL and stops being built, so upgrading Fedora is your call to make rather than something a build schedule forces.
 
 The packages and the repo metadata are both signed, so dnf asks you to accept the signing key the first time.  Check it before you accept it — `gpg --show-keys` on what the site serves should print `FC3F2A6C5D05CE26434442BBD9500E334C48DD8B`, matching [`pages/RPM-GPG-KEY-acs-override`](pages/RPM-GPG-KEY-acs-override) here in the repo.  Every build is attested too, so `gh attestation verify <rpm> --repo some-natalie/fedora-acs-override` will tell you which workflow run produced it.
 
@@ -60,7 +76,13 @@ The packages and the repo metadata are both signed, so dnf asks you to accept th
     curl -o ~/rpmbuild/SOURCES/add-acs-override.patch https://raw.githubusercontent.com/some-natalie/fedora-acs-override/main/acs/add-acs-override.patch    
     ```
 
-1. (ACS only) - Edit `~/rpmbuild/SPECS/kernel.spec` to set the build ID and add the patch.  Since each release of the spec file could change, it's not much help giving line numbers, but both of these should be near the top of the file.  To set the build id, add the two lines near the top of the spec file with the other release information.
+1. (ACS only) - Edit `~/rpmbuild/SPECS/kernel.spec` to rename the package, set the build ID, and add the patch.  Since each release of the spec file could change, it's not much help giving line numbers, but the first two of these should be near the top of the file.  Change the package name so your build is a separate package family from Fedora's kernel instead of competing with it — every subpackage is named off this one line, so `kernel-acs-core`, `kernel-acs-devel` and the rest follow.
+
+    ```specfile
+    %global package_name kernel-acs
+    ```
+
+    Then set the build id, near the top with the other release information, so `uname -r` says which kernel you're on.
 
     ```specfile
     # Set buildid
@@ -93,7 +115,7 @@ The packages and the repo metadata are both signed, so dnf asks you to accept th
     sudo dnf localinstall *.rpm
     ```
 
-    :information_source:  You should now have at least the following packages installed:  `kernel`, `kernel-core`, `kernel-devel`, `kernel-modules`, and `kernel-modules-extra`.
+    :information_source:  You should now have at least the following packages installed:  `kernel-acs`, `kernel-acs-core`, `kernel-acs-devel`, `kernel-acs-modules`, and `kernel-acs-modules-extra`.  Your stock `kernel` packages are untouched and still bootable.
 
 1. Update and reboot
 
@@ -119,6 +141,8 @@ The packages and the repo metadata are both signed, so dnf asks you to accept th
     dnf remove *nouveau*
     echo "blacklist nouveau" >> /etc/modprobe.d/blacklist.conf
     ```
+
+    :information_source:  On the ACS kernel that's `kernel-acs-devel` instead of `kernel-devel`.  It provides `kernel-devel-uname-r`, which is what akmod matches against, so the nVidia module builds against it the same way.
 
 1. Reboot again!
 
