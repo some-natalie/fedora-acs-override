@@ -34,6 +34,13 @@ sed -i 's|cp ./bpf/tools/sbin/bpftool %{buildroot}%{_libexecdir}/kselftests/bpf/
 # undeclared. It hides the missing-file error, so the message blames the patch.
 mv ~/rpmbuild/SPECS/kernel.spec ~/rpmbuild/SPECS/kernel-acs.spec
 
+# The config and changelog sources are named off %{name} too, so they follow the
+# rename as well - %prep copies them by glob and fails if none match.
+cd ~/rpmbuild/SOURCES || exit 1
+for f in kernel-*.config kernel.changelog; do
+  [ -e "$f" ] && mv "$f" "kernel-acs${f#kernel}"
+done
+
 # Build the things!
 # perf, libperf and tools are dropped because they're named absolutely
 # (%package -n perf) rather than off %{name}, so the rename misses them and they
