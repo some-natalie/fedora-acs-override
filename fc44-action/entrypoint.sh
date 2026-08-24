@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set environment variable
-echo "kernel-version=$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+')" >> $GITHUB_OUTPUT
+echo "kernel-version=$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+')" >>"$GITHUB_OUTPUT"
 
 # Download the latest kernel source RPM
 koji download-build --arch=src kernel-"$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+.fc[0-9][0-9]')".src.rpm
@@ -16,10 +16,22 @@ cd ~/rpmbuild/SPECS/ && dnf builddep kernel.spec -y
 curl -o ~/rpmbuild/SOURCES/add-acs-override.patch https://raw.githubusercontent.com/some-natalie/fedora-acs-override/main/acs/add-acs-override.patch
 
 # Edit the spec file with some sed magics
+# Rename the whole family to kernel-acs - every subpackage is named off %{name}.
+# Sharing Fedora's names doesn't just risk confusion, it can't win: the .acs
+# buildid lands before %{?dist}, so rpm reads 200.acs.fc44 as older than 200.fc44.
+sed -i 's/^%global package_name kernel$/%global package_name kernel-acs/' ~/rpmbuild/SPECS/kernel.spec
+if ! grep -q '^%global package_name kernel-acs$' ~/rpmbuild/SPECS/kernel.spec; then
+  echo "::error::could not rename package_name, kernel.spec layout changed"
+  exit 1
+fi
 sed -i 's/# define buildid .local/%define buildid .acs/g' ~/rpmbuild/SPECS/kernel.spec
 sed -i '/^Patch1:*/a Patch1000: add-acs-override.patch' ~/rpmbuild/SPECS/kernel.spec
 sed -i '/^ApplyOptionalPatch patch-*/a ApplyOptionalPatch add-acs-override.patch' ~/rpmbuild/SPECS/kernel.spec
 sed -i 's|cp ./bpf/tools/sbin/bpftool %{buildroot}%{_libexecdir}/kselftests/bpf/bpftool|cp /usr/bin/bpftool %{buildroot}%{_libexecdir}/kselftests/bpf/bpftool|' ~/rpmbuild/SPECS/kernel.spec
 
 # Build the things!
-cd ~/rpmbuild/SPECS && rpmbuild -bb kernel.spec --without debug --without debuginfo --target x86_64 --nodeps
+# perf, libperf and tools are dropped because they're named absolutely
+# (%package -n perf) rather than off %{name}, so the rename misses them and they
+# would collide with Fedora's. rtla and rv are inside the tools conditional.
+cd ~/rpmbuild/SPECS && rpmbuild -bb kernel.spec --without debug --without debuginfo \
+  --without perf --without libperf --without tools --target x86_64 --nodeps

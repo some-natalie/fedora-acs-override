@@ -2,7 +2,6 @@
 name=ACS override kernel for Fedora $releasever
 baseurl=https://some-natalie.github.io/fedora-acs-override/fc$releasever/
 enabled=1
-priority=1
 gpgcheck=1
 repo_gpgcheck=1
 gpgkey=https://some-natalie.github.io/fedora-acs-override/RPM-GPG-KEY-acs-override
