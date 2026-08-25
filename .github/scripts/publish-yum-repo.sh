@@ -100,7 +100,13 @@ for fc in $fcs; do
       mkdir -p "$dir"
       gh release download "$tag" --repo "$REPO" --dir "$dir" --pattern '*.rpm'
     fi
-    if rpm --checksig "$dir"/*.rpm | grep -v 'signatures OK'; then
+    # sudo, because --import above wrote the key into root's keyring and an
+    # unprivileged --checksig reports every package NOKEY.  Collected rather than
+    # piped into `if`, because pipefail makes the condition read rpm's nonzero exit
+    # instead of grep's match, which is exactly backwards.
+    unsigned=$(sudo rpm --checksig "$dir"/*.rpm | grep -v 'signatures OK' || true)
+    if [ -n "$unsigned" ]; then
+      printf '%s\n' "$unsigned"
       echo "::error::the RPMs above are unsigned, refusing to publish"
       exit 1
     fi
