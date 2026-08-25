@@ -138,11 +138,22 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Collect the freshly built RPMs
+      # downloaded by name into a fixed path, because a pattern download flattens
+      # into path/ instead of path/<artifact> whenever only one artifact matches,
+      # and then the publish script finds no fresh RPMs for the version that built
+      - name: Collect the freshly built Fedora 43 RPMs
+        if: needs.build-fc43.result == 'success'
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          path: fresh
-          pattern: rpms-fc*
+          name: rpms-fc43
+          path: fresh/rpms-fc43
+
+      - name: Collect the freshly built Fedora 44 RPMs
+        if: needs.build-fc44.result == 'success'
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: rpms-fc44
+          path: fresh/rpms-fc44
 
       - name: Install the signing and indexing tools
         run: sudo apt-get update -qq && sudo apt-get install -y -qq rpm createrepo-c
