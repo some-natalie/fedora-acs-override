@@ -71,8 +71,8 @@ for fc in $fcs; do
       # publishing is what freezes a release, so the assets have to go on while it's
       # still a draft
       gh release create "$tag" --repo "$REPO" --draft \
-        --title "Fedora ${fc} ACS override kernel ${tag}" \
-        --notes "Kernel ${tag} with Alex Williamson's ACS override patch applied." \
+        --title "kernel-acs-${tag}" \
+        --notes "Fedora ${fc} kernel ${tag} with ACS override patch applied." \
         "$work/$tag"/*.rpm
       gh release edit "$tag" --repo "$REPO" --draft=false
       # only the RPMs this run actually published are worth attesting
