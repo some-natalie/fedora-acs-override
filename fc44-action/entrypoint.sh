@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Set environment variable
 echo "kernel-version=$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+')" >>"$GITHUB_OUTPUT"
@@ -12,8 +13,10 @@ rpm -Uvh kernel-"$(dnf list kernel | grep -Eo '[0-9]\.[0-9]+\.[0-9]+-[0-9]+.fc[0
 # Install the build dependencies
 cd ~/rpmbuild/SPECS/ && dnf builddep kernel.spec -y
 
-# Download the ACS override patch
-curl -o ~/rpmbuild/SOURCES/add-acs-override.patch https://raw.githubusercontent.com/some-natalie/fedora-acs-override/main/acs/add-acs-override.patch
+# Take the ACS override patch from the checkout, not the network - fetching it
+# from raw.githubusercontent.com flakes, and pinning to main meant PR builds
+# never tested the PR's own patch.
+cp "$GITHUB_WORKSPACE/acs/add-acs-override.patch" ~/rpmbuild/SOURCES/add-acs-override.patch
 
 # Edit the spec file with some sed magics
 # Rename the whole family to kernel-acs - every subpackage is named off %{name}.
