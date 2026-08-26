@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ACS override kernel for Fedora</title>
+</head>
+<body>
+
+<h1>ACS override kernel for Fedora</h1>
+
+<p>A dnf repo of Fedora kernels with <a href="https://lkml.org/lkml/2013/5/30/513">Alex Williamson's ACS override patch</a> applied, for PCI passthrough of devices that share an IOMMU group. Rebuilt daily against the newest Fedora kernel. Source and full setup notes: <a href="https://github.com/some-natalie/fedora-acs-override">some-natalie/fedora-acs-override</a>.</p>
+
+<h2>Install</h2>
+
+<pre>
+sudo dnf config-manager addrepo --from-repofile=https://some-natalie.github.io/fedora-acs-override/acs-override.repo
+sudo dnf install kernel-acs kernel-acs-core kernel-acs-devel kernel-acs-modules kernel-acs-modules-extra
+sudo reboot
+</pre>
+
+<p>These are <code>kernel-acs*</code>, a separate package family from Fedora's own <code>kernel*</code>, so nothing is replaced. Both stay installed and bootable, and you pick which one runs at the boot menu. <code>uname -r</code> shows <code>.acs</code> when you're on this one.</p>
+
+<h2>Check the signing key first</h2>
+
+<p>Packages and repo metadata are both signed, so dnf asks you to accept the key on first install. Verify it before you do — the fingerprint should be <code>FC3F2A6C5D05CE26434442BBD9500E334C48DD8B</code>:</p>
+
+<pre>
+curl -s https://some-natalie.github.io/fedora-acs-override/RPM-GPG-KEY-acs-override | gpg --show-keys
+</pre>
+
+<p>Builds are attested too:</p>
+
+<pre>
+gh attestation verify kernel-acs-core-*.rpm --repo some-natalie/fedora-acs-override
+</pre>
+
+<h2>Going back a version</h2>
+
+<p>The five newest kernel versions per Fedora release stay in the repo. Kernels are <code>installonly</code>, so <code>dnf downgrade</code> refuses — install the older version by name instead and it lands alongside what you have:</p>
+
+<pre>
+dnf list --showduplicates kernel-acs-core
+sudo dnf install kernel-acs-core-7.1.8-200.acs.fc44 kernel-acs-modules-7.1.8-200.acs.fc44
+sudo grubby --info=ALL | grep -E 'index|title'
+sudo grubby --set-default=/boot/vmlinuz-7.1.8-200.acs.fc44.x86_64
+</pre>
+
+<h2>Host configuration</h2>
+
+<p>Installing the kernel is only half of it — IOMMU still has to be enabled on the kernel command line, and identical cards need <code>pcie_acs_override=downstream</code>. The grub, modprobe, and dracut configuration is in <a href="https://github.com/some-natalie/fedora-acs-override#setup-and-configuration-of-the-host-machine">the README</a>.</p>
+
+<p>No warranty, no support. Back up anything you care about first.</p>
+
+</body>
+</html>
