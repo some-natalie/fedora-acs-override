@@ -95,6 +95,10 @@ for fc in $fcs; do
         printf 'PUBLISHED_FC%s=%s\n' "$fc" "$work/$tag" >>"${GITHUB_ENV:-/dev/null}"
         releases=$(printf '%s\n%s' "$releases" "$tag")
       else
+        # the failed publish leaves its draft behind, and a stray draft is what
+        # stalls this pipeline in the first place - clear it rather than leaving
+        # one to be found later
+        gh release delete "$tag" --repo "$REPO" --yes 2>/dev/null || true
         # left out of $releases on purpose: an unpublished release's assets 404 for
         # everyone but this token, and indexing them hands dnf URLs it can't fetch
         echo "::warning::could not publish ${tag}, leaving it out of the repo - a deleted release burns its tag name for good"
