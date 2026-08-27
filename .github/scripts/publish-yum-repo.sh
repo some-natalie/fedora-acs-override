@@ -58,27 +58,49 @@ for fc in $fcs; do
   if [ -d "fresh/rpms-fc${fc}" ]; then
     version_var="V${fc}"
     tag=${!version_var}
-    if gh release view "$tag" --repo "$REPO" >/dev/null 2>&1; then
+    # isDraft, not just existence: a draft that never flipped to published looks
+    # like a release to `gh release view` but its assets are private, so treating
+    # it as done blocks this version forever while the build job keeps rebuilding it
+    existing=$(gh release view "$tag" --repo "$REPO" --json isDraft --jq .isDraft 2>/dev/null || true)
+    if [ "$existing" = "false" ]; then
       # a forced rebuild of a version that's already out: the published assets are
       # frozen and are what the repodata has to describe, so the rebuilt RPMs go
       # unused rather than being indexed as bytes nobody can download
       echo "::warning::${tag} is already released and immutable, indexing what it published"
+      releases=$(printf '%s\n%s' "$releases" "$tag")
     else
+      # a leftover draft holds no tag and nothing public points at it, so drop it
+      # and republish from this build rather than adopting assets nobody can fetch
+      if [ -n "$existing" ]; then
+        echo "::warning::${tag} was left as a draft, deleting it and publishing this build"
+        gh release delete "$tag" --repo "$REPO" --yes
+      fi
       mkdir -p "$work/$tag"
       mv "fresh/rpms-fc${fc}"/*.rpm "$work/$tag"/
       # sign before upload: repodata carries checksums of the bytes that get served
       rpm --addsign "$work/$tag"/*.rpm
       # publishing is what freezes a release, so the assets have to go on while it's
-      # still a draft
-      gh release create "$tag" --repo "$REPO" --draft \
+      # still a draft.  Publishing is also where it can fail for good: immutable
+      # releases burn a tag name when a release is deleted, so a version whose
+      # release went away can never be published again.  Warn and index without it
+      # instead of failing, so the repo keeps serving the versions that do exist and
+      # the next kernel publishes normally.
+      if gh release create "$tag" --repo "$REPO" --draft \
         --title "kernel-acs-${tag}" \
         --notes "Fedora ${fc} kernel ${tag} with ACS override patch applied." \
-        "$work/$tag"/*.rpm
-      gh release edit "$tag" --repo "$REPO" --draft=false
-      # only the RPMs this run actually published are worth attesting
-      printf 'PUBLISHED_FC%s=%s\n' "$fc" "$work/$tag" >>"${GITHUB_ENV:-/dev/null}"
+        "$work/$tag"/*.rpm &&
+        gh release edit "$tag" --repo "$REPO" --draft=false &&
+        [ "$(gh release view "$tag" --repo "$REPO" --json isDraft --jq .isDraft)" = "false" ]; then
+        # only the RPMs this run actually published are worth attesting
+        printf 'PUBLISHED_FC%s=%s\n' "$fc" "$work/$tag" >>"${GITHUB_ENV:-/dev/null}"
+        releases=$(printf '%s\n%s' "$releases" "$tag")
+      else
+        # left out of $releases on purpose: an unpublished release's assets 404 for
+        # everyone but this token, and indexing them hands dnf URLs it can't fetch
+        echo "::warning::could not publish ${tag}, leaving it out of the repo - a deleted release burns its tag name for good"
+        rm -rf "${work:?}/${tag:?}"
+      fi
     fi
-    releases=$(printf '%s\n%s' "$releases" "$tag")
   fi
 
   mine=$(printf '%s\n' "$releases" | { grep -E "\.fc${fc}\$" || true; } | sort -u -V)
