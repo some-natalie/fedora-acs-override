@@ -3,7 +3,7 @@
 # immutable release, and build the repo metadata that Pages serves.
 #
 # Run from the repo root, after the build artifacts are downloaded to fresh/.
-# Needs GH_TOKEN, REPO, KEYID, and V43/V44 (the kernel version per release).
+# Needs GH_TOKEN, REPO, KEYID, and V43/V44/V45 (the kernel version per release).
 set -euo pipefail
 
 # kernel versions kept installable per Fedora release, so a kernel that breaks

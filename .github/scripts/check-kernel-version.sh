@@ -6,7 +6,7 @@
 # Set FORCE=true to build regardless of what's published.
 set -euo pipefail
 
-for fc in 43 44; do
+for fc in 43 44 45; do
   # reuse the digest pin from the build container so there's one source of truth
   image=$(grep -oE '^FROM [^ ]+' "fc${fc}-action/Dockerfile" | cut -d' ' -f2)
   upstream=$(docker run --rm "$image" \

@@ -5,8 +5,8 @@ All of them run from the repo root and read their inputs from the environment, s
 | script | called by | environment it needs |
 | --- | --- | --- |
 | `check-kernel-version.sh` | `build-acs-kernel.yml`, `check` job | `GH_TOKEN`, `GITHUB_OUTPUT`, optional `FORCE=true` |
-| `free-disk-space.sh` | `build-acs-kernel.yml`, both build jobs | nothing |
-| `build-kernel-rpms.sh` | `build-acs-kernel.yml`, both build jobs; `pr-checks.yml`, `build-dependabot-PRs` | `FEDORA_RELEASE` (`43`/`44`), `RUNNER_TEMP`, `GITHUB_WORKSPACE`, optional `STUB=true` |
+| `free-disk-space.sh` | `build-acs-kernel.yml`, every build job | nothing |
+| `build-kernel-rpms.sh` | `build-acs-kernel.yml`, every build job; `pr-checks.yml`, `build-dependabot-PRs` | `FEDORA_RELEASE` (`43`/`44`/`45`), `RUNNER_TEMP`, `GITHUB_WORKSPACE` |
 | `import-signing-key.sh` | `build-acs-kernel.yml`, `publish` job | `SIGNING_KEY`, `GITHUB_ENV` |
 | `publish-yum-repo.sh` | `build-acs-kernel.yml`, `publish` job | `GH_TOKEN`, `REPO`, `KEYID`, `V43`, `V44`, `GITHUB_ENV` |
 | `parse-action-diff.sh` | `malcontent-actions.yml`, `extract-action-repo` | `GH_TOKEN`, `PR_NUMBER`, `GITHUB_OUTPUT` |
