@@ -9,5 +9,6 @@ updates:
     directories:
       - "/fc43-action"
       - "/fc44-action"
+      - "/fc45-action"
     schedule:
       interval: "weekly"
