@@ -38,7 +38,7 @@ jobs:
           VALIDATE_BASH_EXEC: true # the workflows call .github/scripts directly
 
   build-dependabot-PRs:
-    name: Build the kernel RPMs, if the PR is from Dependabot
+    name: Start the kernel build, if the PR is from Dependabot
     runs-on: ubuntu-latest
     if: ${{ github.actor == 'dependabot[bot]' && github.event.pull_request.head.repo.full_name == github.repository }}
     steps:
@@ -51,13 +51,19 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - name: Build the FC43 kernel RPMs
+      # STUB=true stops each container after the prep and before rpmbuild.
+      # Dependabot moves the base image and the action pins, which is everything
+      # the prep covers - the packages, koji, the spec surgery - and nothing the
+      # compile would tell us for another 90 minutes per release.
+      - name: Start the FC43 kernel build
         env:
           FEDORA_RELEASE: "43"
+          STUB: "true"
         run: .github/scripts/build-kernel-rpms.sh
-      - name: Build the FC44 kernel RPMs
+      - name: Start the FC44 kernel build
         env:
           FEDORA_RELEASE: "44"
+          STUB: "true"
         run: .github/scripts/build-kernel-rpms.sh
 
   # merge-dependabot-PRs:
