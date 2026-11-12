@@ -24,6 +24,8 @@ jobs:
       fc43-version: ${{ steps.check.outputs.fc43-version }}
       fc44-build: ${{ steps.check.outputs.fc44-build }}
       fc44-version: ${{ steps.check.outputs.fc44-version }}
+      fc45-build: ${{ steps.check.outputs.fc45-build }}
+      fc45-version: ${{ steps.check.outputs.fc45-version }}
     steps:
       - name: Harden the runner (Audit all outbound calls)
         uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
@@ -114,9 +116,46 @@ jobs:
             !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*selftests*.rpm
             !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*doc*.rpm
 
+  build-fc45:
+    needs: check
+    if: needs.check.outputs.fc45-build == 'true'
+    permissions:
+      contents: read
+      actions: write # to allow the workflow to upload artifacts
+    runs-on: ubuntu-latest
+    name: Build Fedora 45 kernel with ACS override patch
+    steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout this repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Free up disk space
+        run: .github/scripts/free-disk-space.sh
+
+      - name: Build the Fedora 45 RPMs
+        uses: ./fc45-action
+
+      - name: Hand the RPMs to the publish job
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: rpms-fc45
+          retention-days: 1 # the release is the durable copy
+          path: |
+            /home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/
+            !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*debug*.rpm
+            !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*selftests*.rpm
+            !/home/runner/work/_temp/_github_home/rpmbuild/RPMS/x86_64/*doc*.rpm
+
+
   publish:
-    needs: [check, build-fc43, build-fc44]
-    if: ${{ !cancelled() && (needs.build-fc43.result == 'success' || needs.build-fc44.result == 'success') }}
+    needs: [check, build-fc43, build-fc44, build-fc45]
+    if: ${{ !cancelled() && (needs.build-fc43.result == 'success' || needs.build-fc44.result == 'success' || needs.build-fc45.result == 'success') }}
     permissions:
       contents: write # to create releases and upload RPMs
       pages: write # to deploy the yum repo
@@ -155,6 +194,13 @@ jobs:
           name: rpms-fc44
           path: fresh/rpms-fc44
 
+      - name: Collect the freshly built Fedora 45 RPMs
+        if: needs.build-fc45.result == 'success'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: rpms-fc45
+          path: fresh/rpms-fc45
+
       - name: Install the signing and indexing tools
         run: sudo apt-get update -qq && sudo apt-get install -y -qq rpm createrepo-c
 
@@ -169,6 +215,7 @@ jobs:
           REPO: ${{ github.repository }}
           V43: ${{ needs.check.outputs.fc43-version }}
           V44: ${{ needs.check.outputs.fc44-version }}
+          V45: ${{ needs.check.outputs.fc45-version }}
         run: .github/scripts/publish-yum-repo.sh
 
       - name: Attest the Fedora 43 RPMs
@@ -182,6 +229,12 @@ jobs:
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: ${{ env.PUBLISHED_FC44 }}/*.rpm
+
+      - name: Attest the Fedora 45 RPMs
+        if: env.PUBLISHED_FC45 != ''
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: ${{ env.PUBLISHED_FC45 }}/*.rpm
 
       - name: Upload the site
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
