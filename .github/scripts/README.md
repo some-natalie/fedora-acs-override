@@ -20,6 +20,8 @@ All of them run from the repo root and read their inputs from the environment, s
 
 The script recreates the environment the runner used to hand the action: `HOME=/github/home` bound to `$RUNNER_TEMP/_github_home`, which is where `~/rpmbuild` lands and where the `upload-artifact` globs go looking for the RPMs, and the checkout bound to `/github/workspace` so `entrypoint.sh` can copy the ACS patch out of it. `GITHUB_OUTPUT` is pointed at `/dev/null`: the entrypoint writes a `kernel-version` output that no step ever read, since published versions come from the `check` job.
 
+`STUB=true` is passed through to `entrypoint.sh`, which runs the whole prep and exits before `rpmbuild`. That's what Dependabot's PRs get: a base image bump or an action pin can break the build deps, `koji download-build`, or the spec surgery against whatever `kernel.spec` looks like upstream today, and all of that runs in the prep. What it can't break is the compile, so the PR check doesn't spend 90 minutes per Fedora release finding that out. A real kernel build is what the scheduled run is for.
+
 `publish-yum-repo.sh` writes `PUBLISHED_FC43`/`PUBLISHED_FC44` to `GITHUB_ENV` naming the directory it just published, and the attestation steps key off those. That way a run only attests RPMs it actually released, rather than re-attesting the older ones it downloaded to rebuild the index.
 
 `publish-yum-repo.sh` signs the RPMs before uploading them to the release, because the repo metadata carries checksums of the exact bytes that get served.

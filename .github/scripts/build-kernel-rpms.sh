@@ -24,6 +24,7 @@ docker run --rm \
   --env HOME=/github/home \
   --env GITHUB_OUTPUT=/dev/null \
   --env GITHUB_WORKSPACE=/github/workspace \
+  --env "STUB=${STUB:-false}" \
   --volume "${build_home}:/github/home" \
   --volume "${GITHUB_WORKSPACE}:/github/workspace" \
   "$image"

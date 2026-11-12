@@ -44,6 +44,15 @@ for f in kernel-*.config kernel.changelog; do
   [ -e "$f" ] && mv "$f" "kernel-acs${f#kernel}"
 done
 
+# Dependabot's PRs only move the base image and the action pins, so they run the
+# prep and stop here. Everything above is what an image bump can break - the
+# packages, koji, the spec surgery against whatever kernel.spec looks like today.
+# The compile below is 90 minutes that Dependabot has no say over.
+if [ "${STUB:-false}" = "true" ]; then
+  echo "::notice::STUB=true, stopping before rpmbuild"
+  exit 0
+fi
+
 # Build the things!
 # perf, libperf and tools are dropped because they're named absolutely
 # (%package -n perf) rather than off %{name}, so the rename misses them and they
