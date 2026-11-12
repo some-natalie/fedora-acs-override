@@ -6,6 +6,7 @@ All of them run from the repo root and read their inputs from the environment, s
 | --- | --- | --- |
 | `check-kernel-version.sh` | `build-acs-kernel.yml`, `check` job | `GH_TOKEN`, `GITHUB_OUTPUT`, optional `FORCE=true` |
 | `free-disk-space.sh` | `build-acs-kernel.yml`, both build jobs | nothing |
+| `build-kernel-rpms.sh` | `build-acs-kernel.yml`, both build jobs; `pr-checks.yml`, `build-dependabot-PRs` | `FEDORA_RELEASE` (`43`/`44`), `RUNNER_TEMP`, `GITHUB_WORKSPACE` |
 | `import-signing-key.sh` | `build-acs-kernel.yml`, `publish` job | `SIGNING_KEY`, `GITHUB_ENV` |
 | `publish-yum-repo.sh` | `build-acs-kernel.yml`, `publish` job | `GH_TOKEN`, `REPO`, `KEYID`, `V43`, `V44`, `GITHUB_ENV` |
 | `parse-action-diff.sh` | `malcontent-actions.yml`, `extract-action-repo` | `GH_TOKEN`, `PR_NUMBER`, `GITHUB_OUTPUT` |
@@ -14,6 +15,10 @@ All of them run from the repo root and read their inputs from the environment, s
 | `comment-malcontent-results.sh` | `malcontent-actions.yml`, `comment` | `GH_TOKEN`, `REPO`, `PR_NUMBER` |
 
 `check-kernel-version.sh` reads the Fedora image digest out of each `fc*-action/Dockerfile` rather than pinning it again, so Dependabot's Dockerfile updates stay the single source of truth.
+
+`build-kernel-rpms.sh` runs the build container by hand instead of letting each `fc*-action` be a Docker Action, because the build needs `--security-opt seccomp=unconfined` and a Docker Action takes no docker flags. `kernel.spec` hmac-signs the kernel with `sha512hmac`, which hashes over an `AF_ALG` socket, and docker's builtin seccomp profile denies that socket on the ubuntu-26.04 runner image - the failure is `Allocation of hmac(sha512) cipher failed (ret=-1)` about 90 minutes into `%build`. Loosening AppArmor doesn't help and neither does loading `af_alg`/`algif_hash` on the host; seccomp is the only gate. The directories keep their `-action` names because `check-kernel-version.sh` and `dependabot.yml` both find the Dockerfiles by that path.
+
+The script recreates the environment the runner used to hand the action: `HOME=/github/home` bound to `$RUNNER_TEMP/_github_home`, which is where `~/rpmbuild` lands and where the `upload-artifact` globs go looking for the RPMs, and the checkout bound to `/github/workspace` so `entrypoint.sh` can copy the ACS patch out of it. `GITHUB_OUTPUT` is pointed at `/dev/null`: the entrypoint writes a `kernel-version` output that no step ever read, since published versions come from the `check` job.
 
 `publish-yum-repo.sh` writes `PUBLISHED_FC43`/`PUBLISHED_FC44` to `GITHUB_ENV` naming the directory it just published, and the attestation steps key off those. That way a run only attests RPMs it actually released, rather than re-attesting the older ones it downloaded to rebuild the index.
 
