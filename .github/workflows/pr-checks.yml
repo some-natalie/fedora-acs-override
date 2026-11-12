@@ -52,11 +52,13 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - name: Build the FC43 kernel RPMs
-        uses: ./fc43-action
-        id: build-fc43-rpms
+        env:
+          FEDORA_RELEASE: "43"
+        run: .github/scripts/build-kernel-rpms.sh
       - name: Build the FC44 kernel RPMs
-        uses: ./fc44-action
-        id: build-fc44-rpms
+        env:
+          FEDORA_RELEASE: "44"
+        run: .github/scripts/build-kernel-rpms.sh
 
   # merge-dependabot-PRs:
   #     name: Automatically merge Dependabot PRs

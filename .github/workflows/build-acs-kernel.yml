@@ -65,7 +65,9 @@ jobs:
         run: .github/scripts/free-disk-space.sh
 
       - name: Build the Fedora 43 RPMs
-        uses: ./fc43-action
+        env:
+          FEDORA_RELEASE: "43"
+        run: .github/scripts/build-kernel-rpms.sh
 
       - name: Hand the RPMs to the publish job
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -101,7 +103,9 @@ jobs:
         run: .github/scripts/free-disk-space.sh
 
       - name: Build the Fedora 44 RPMs
-        uses: ./fc44-action
+        env:
+          FEDORA_RELEASE: "44"
+        run: .github/scripts/build-kernel-rpms.sh
 
       - name: Hand the RPMs to the publish job
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
