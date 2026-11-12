@@ -1,0 +1,71 @@
+---
+name: Probe AF_ALG
+
+# Throwaway diagnostic: sha512hmac in the kernel build broke when ubuntu-latest
+# moved to 26.04. Find out which host change kills AF_ALG inside the container.
+
+on:
+  push:
+    branches:
+      - probe-afalg
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Host facts
+        run: |
+          set -x
+          uname -a
+          docker version --format '{{.Server.Version}}'
+          docker info --format '{{json .SecurityOptions}}'
+          lsmod | grep -iE 'af_alg|algif' || echo "no alg modules loaded"
+          sudo aa-status --json 2>/dev/null | head -c 400 || sudo aa-status | head -5
+
+      - name: Build a probe image with sha512hmac
+        run: |
+          docker run --name seed fedora:44 dnf install -y libkcapi-hmaccalc
+          docker commit seed probe:local
+
+      - name: sha512hmac with default confinement
+        run: |
+          docker run --rm probe:local \
+            bash -c 'echo test > /tmp/f && sha512hmac /tmp/f' || echo "EXIT=$?"
+
+      - name: sha512hmac with seccomp=unconfined
+        run: |
+          docker run --rm --security-opt seccomp=unconfined probe:local \
+            bash -c 'echo test > /tmp/f && sha512hmac /tmp/f' || echo "EXIT=$?"
+
+      - name: sha512hmac with apparmor=unconfined
+        run: |
+          docker run --rm --security-opt apparmor=unconfined probe:local \
+            bash -c 'echo test > /tmp/f && sha512hmac /tmp/f' || echo "EXIT=$?"
+
+      - name: Load the modules on the host, then retry default confinement
+        run: |
+          sudo modprobe af_alg algif_hash
+          lsmod | grep -iE 'af_alg|algif'
+          docker run --rm probe:local \
+            bash -c 'echo test > /tmp/f && sha512hmac /tmp/f' || echo "EXIT=$?"
+
+  probe-2404:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Host facts
+        run: |
+          set -x
+          uname -a
+          docker version --format '{{.Server.Version}}'
+          lsmod | grep -iE 'af_alg|algif' || echo "no alg modules loaded"
+
+      - name: sha512hmac with default confinement
+        run: |
+          docker run --name seed fedora:44 dnf install -y libkcapi-hmaccalc
+          docker commit seed probe:local
+          docker run --rm probe:local \
+            bash -c 'echo test > /tmp/f && sha512hmac /tmp/f' || echo "EXIT=$?"
